@@ -1,3 +1,7 @@
+#Bild aus Verzeichnis oder von Webcam öffenen
+#Bild in Graubild wandeln und mit opencv optimieren
+#optimiertes Bild mit tesseract in Text übersetzten
+
 import os
 import cv2
 import platform
@@ -53,27 +57,9 @@ my_conf='outputbase digits'   #einzelen Ziffern erkennen
 text = pytesseract.image_to_string(img, config=my_conf)
 text=text.split("\n")
 result=[]
-for item in text:
-    result.append(item)
+for zeile in text:
+    result.append(zeile)
 # Ausgabe"
 print(result)
 ############################################
 
-#### Detecting Characters  ######
-#############################################
-# pytesseract.pytesseract.tesseract_cmd = r"C:/msys64/mingw64/bin/tesseract.exe"
-# pytesseract    
-
-# img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  #in RGB Bild umwandeln
-
-# hImg, wImg,_ = img.shape
-# boxes = pytesseract.image_to_boxes(img)
-# for b in boxes.splitlines():
-#     print(b)
-#     b = b.split(' ')
-#     print(b)
-#     x, y, w, h = int(b[1]), int(b[2]), int(b[3]), int(b[4])
-#     cv2.rectangle(img, (x,hImg- y), (w,hImg- h), (50, 50, 255), 2)
-#     cv2.putText(img,b[0],(x,hImg- y+25),cv2.FONT_HERSHEY_SIMPLEX,1,(50,50,255),2)
-
-######################################################
