@@ -7,7 +7,8 @@ import cv2
 import platform
 from PIL import Image
 import pytesseract
-from webcam import Bild_aufnehmen
+from src.webcam import Bild_aufnehmen
+
 
 # Setze die Umgebungsvariable TESSDATA_PREFIX
 os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
@@ -62,4 +63,5 @@ for zeile in text:
 # Ausgabe"
 print(result)
 ############################################
+
 
