@@ -1,4 +1,40 @@
 import csv
+#import Real Expressions package to define and search string-patterns:
+import re
+
+
+
+
+# Function to extract the shop names from the OCR text:
+def extract_shop_names(ocr_text):
+    # Regular expression pattern to match one of the specified substrings
+    pattern = r'\b(Denner|Coop|Migros)\b'
+    
+    # Search for the substrings in the OCR text
+    matches = re.findall(pattern, ocr_text)
+    
+    # If more than one match is found, display a warning message
+    if len(matches) > 1:
+        print("Warning: Multiple shop names found!")
+    
+    # Return all matches found (if any)
+    return matches
+
+# Function to extract the date from the OCR text:
+def extract_receipt_date(ocr_text):
+	# date pattern (COOP):
+	##.##.## (# = a digit 0,...,9)
+	date_pattern = r'\b[0-9]{2}\.[0-9]{2}\.[0-9]{2}\b'
+	# or 	date_pattern = r'\b\d{2}\.\d{2}\.\d{2}\b'
+	
+	# Search for dates using the pattern
+	dates_found = re.findall(date_pattern, ocr_text)
+	
+	# Return the found date:
+	return dates_found
+
+
+
 
 def write_receipt_to_csv(file_name, receipt):
     # Make and open new csv file
@@ -51,13 +87,14 @@ Price_Pattern:
 # assign price and item-amount to two appropriate vectors (because these vars occure multiple times on one single receipt), sothat the vect-elements can then just be iterated through in the dictionary below.
 
 
-# date pattern (COOP):
-	##.##.## (# = a digit 0,...,9)
-date_pattern = r'\b[0-9]{2}\.[0-9]{2}\.[0-9]{2}\b'
-# or 	date_pattern = r'\b\d{2}\.\d{2}\.\d{2}\b'
-
-# Search for dates using the pattern
-dates_found = re.findall(date_pattern, ocr_text)
+# Time-code:
+from datetime import datetime
+print("Current date:",datetime.utcnow())
+date= datetime.utcnow() - datetime(1970, 1, 1)
+print("Number of days since epoch:",date)
+seconds =(date.total_seconds())
+milliseconds = round(seconds*1000)
+print("Milliseconds since epoch:",milliseconds)
 
 
 
@@ -70,13 +107,25 @@ Receipt = [
     {"prefix": None, "sufix": "tree", "Price [CHF]": 3.80}
 ]
 
-# Get OCR output for shop's name and receipt date
-shop_name = "ShopNamefromOCR"
-receipt_date = "ReceiptDatefromOCR"
+#%% Get OCR output for shop's name and receipt date
+# Extract the shop name(s) from the OCR text:
+shop_names = extract_shop_names(ocr_text) # Incase there are accidentally multiple shop names detected we handle this case appropriately. 
+
+# Print all shop names found:
+#print("Shop names extracted:", shop_names)
+
+# In case there are accidentally multiple shop names detected, 
+# convert the list of shop names into a single string with underscores:
+shop_names_string = '_'.join(shop_names)
+#%%
+
+
+
+receipt_date = extract_receipt_date(ocr_text)
 UID = 
 
 # Construct file name based on OCR output
-file_name = f"{shop_name}_{receipt_date}_ReceiptData.csv"
+file_name = f"{receipt_date}_{shop_names_string}_ReceiptData.csv"
 
 # Call the function to write the receipt to CSV file
 write_receipt_to_csv(file_name, Receipt)
