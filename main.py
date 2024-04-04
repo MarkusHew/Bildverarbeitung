@@ -1,6 +1,13 @@
-#Bild aus Verzeichnis oder von Webcam öffenen
-#Bild in Graubild wandeln und mit opencv optimieren
-#optimiertes Bild mit tesseract in Text übersetzten
+"""
+@data:      main.py
+@author:    Markus Hewel
+@versions:  ver 0.0.0 - 01.04.2024
+@desc: 
+    Bild aus Verzeichnis oder von Webcam oeffenen
+    Bild in Graubild wandeln und mit opencv optimieren
+    optimiertes Bild mit tesseract in Text uebersetzten
+    csv File oeffnen und Text in template uebertragen 
+"""
 
 import os
 import cv2
@@ -8,13 +15,15 @@ import platform
 from PIL import Image
 import pytesseract
 from src.webcam import Bild_aufnehmen
+from src.writetocsv import write_receipts_to_csv
+from src.path_handling import getAbsDir, editDir
 
 
 # Setze die Umgebungsvariable TESSDATA_PREFIX
 os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
 
 n=2
-save_path=r"C:\Users\marku\Documents\StudiumMobileRobotics\6.Semester\Bildverarbeitung1\Github\Bildverarbeitung"
+save_path=r"C:\Users\marku\Documents\StudiumMobileRobotics\6.Semester\Bildverarbeitung1\Github\Bildverarbeitung\out"
 
 if(n==1): #Bild mit Webcam aufnehmen
     # Pfad in welchem das Bild gespeichert wird
@@ -23,7 +32,7 @@ if(n==1): #Bild mit Webcam aufnehmen
 if(n==2): #Bild aus Verzeichnis lesen
     try:
         # Öffne das Bild mit Pillow
-        pfad="C:/Users/marku/Documents/StudiumMobileRobotics/6.Semester/Bildverarbeitung1/Github/Bildverarbeitung/Bild.tif"
+        pfad="C:/Users/marku/Documents/StudiumMobileRobotics/6.Semester/Bildverarbeitung1/Github/Bildverarbeitung/Rechnung_Coop.png"
         img = cv2.imread(pfad)
 
     except Exception as e:
@@ -57,9 +66,18 @@ cv2.imwrite(file_path, threshold_image)
 my_conf='outputbase digits'   #einzelen Ziffern erkennen
 text = pytesseract.image_to_string(img, config=my_conf)
 text=text.split("\n")
-result=[]
-for zeile in text:
+result=[]   
+for zeile in text:  #einzelne Zeilen in Liste result speichern
     result.append(zeile)
+
+###########################################
+#schreiben in csv file
+path = getAbsDir(remove=1)
+path = editDir(path, "out",)
+print("csv file: ",path)
+write_receipts_to_csv(path, result)
+
+###########################################    
 # Ausgabe"
 print(result)
 ############################################
