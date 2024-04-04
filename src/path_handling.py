@@ -1,7 +1,7 @@
 """
 @data:      path_handling.py
 @author:    Jannis Mathiuet
-@versions:  ver 0.0.0 - 31.03.2024
+@versions:  ver 0.0.0 - 31.03.2024 - Jannis Mathiuet
 @desc: 
     file to handle paths, e.g. get current working directory, edit a directory path
     
@@ -18,16 +18,62 @@ def getAbsDir(**kwargs):
     path = _removePathEndings(path, remove)
     return path
 
-def editDir(path, foldername, **kwargs) :
+def editDir(path, *folders, **kwargs) :
     remove = kwargs.get('remove', None)
-    add = kwargs.get('add', None)
+    # add = kwargs.get('add', None)
 
     newpath = _removePathEndings(path, remove)
-    if foldername.startswith("\\") is False:
-        foldername = "\\" + foldername
-    newpath = path + foldername
+     
+    folderpath = ""
+    for folder in folders : 
+        folderpath = os.path.join(folderpath, folder)
+    newpath = os.path.join(path, folderpath)
+    if (os.path.exists(newpath)) is False: 
+        print(f"\nThis path does not exist! Try another one. \n{newpath = }\n")
+        return ""
     return newpath
 
+def chooseFile(path: str, **kwargs) :
+    # kwargs list
+    ftype = kwargs.get('ftype', None) # file type
+    fname = kwargs.get('fname', None) # file name
+    # depth = kwargs.get('depth', 0)
+    dircs = kwargs.get('dircs', [""]) 
+    
+    # select path
+    newpath = path
+    for dirc in dircs :    
+        newpath = os.path.join(newpath, dirc)
+    if (os.path.exists(newpath)) is False: 
+        print(f"\nThis path does not exist! Try another one. \n{newpath = }\n")
+    
+    
+    d_limiter = 0
+    for (root, dirs, files) in os.walk(path):
+        if ftype is None : 
+            print(f"Directory ({len(dirs)}): {dirs} ")
+            print(f"Files     ({len(files)}): {files} ")
+
+        if ftype and fname is type(str): 
+            for file in files:
+                if (ftype.endswith(file)):
+                    if (fname in file):
+                        print(file)            
+        if d_limiter == 0: 
+            break
+        d_limiter += 1
+            # for f in file:
+            #     f.conta
+            #     for ftype in f:
+            #         for fname in f:
+            #         if fname is None: 
+            #             print(f)
+            #         if k_ele is element: 
+            #             filepath = os.path.join(newpath, f)
+            #             return filepath
+            #         k_ele += 1
+    return path
+    
 
 # =============================================================================
 # PRIVATE FUNCTIONS
@@ -47,7 +93,7 @@ def _removePathEndings(path, cntremove):
     for i in range(cntremove): 
         path, ending = os.path.split(path)
         newpath = path
-    print(newpath)
+    # print(newpath)
     
     return newpath
 
@@ -58,8 +104,9 @@ def _removePathEndings(path, cntremove):
 def main():
     path = getAbsDir(remove=1)
     print(path)
-    path = editDir(path, "out",)
-    print(path)
+    # path = editDir(path, "out",)
+    # print(path)
+    chooseFile(path, dircs=["in", "test"])
     
 if __name__ == "__main__" :
     main()

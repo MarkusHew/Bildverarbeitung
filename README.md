@@ -1,3 +1,13 @@
+# needed libraries
+pip install opencv
+pip install pytesseract
+pip install pillow
+pip install pdf2image
+
+# needed files
+OpenCV: 
+Tesseract: 
+
 # Bildverarbeitung
 
 1. Bild aus Verzeichnis oder von Webcam öffnen
