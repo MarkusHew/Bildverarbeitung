@@ -4,7 +4,7 @@
 @versions:  ver 0.0.0 - 05.04.2024 - Jannis Mathiuet
 @desc: 
     Demo on how to use file_handling.py
-    
+    If there are any questions, please contact me.
 """
 from src.file_handling import FileHandling
 import cv2
