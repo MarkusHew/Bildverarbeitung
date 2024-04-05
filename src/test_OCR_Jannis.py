@@ -141,6 +141,7 @@ if (1):
         image = cv2.bitwise_not(image)
         
         return image
+
     def thicker_font(image) : 
         import numpy as np
         # funktioniert besser wenn Bild zuerst invertiert, wenn nicht ist hier Erosion
