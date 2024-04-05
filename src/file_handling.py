@@ -5,7 +5,7 @@
             ver 1.0.0 - 05.04.2024 - Jannis Mathiuet
 @desc: 
     file to handle paths and files
-    
+    If there are any questions, please contact me.
 """
 import os
 from PIL import Image as imageMain
