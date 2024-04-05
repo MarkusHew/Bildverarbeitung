@@ -84,6 +84,16 @@ class GraphicsService():
     
     def cvApplyRescalling(self):
         return
+    
+    def cvRemoveBorders(self, cvImage): 
+        # Don't use for PDF!
+        # Don't use for automated task
+        contours = self.cvExtractContours(cvImage)
+        x, y, w, h = cv2.boundingRect(contours)
+        crop = cvImage[y:y+h, x:x+w]
+        return crop
+    def cvAddBorders():
+        return None
 # *****************************************************************************  
 
     # Extracts all contours from the image, and resorts them by area (from largest to smallest)
