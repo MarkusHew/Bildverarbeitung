@@ -11,25 +11,11 @@
 from typing import Tuple
 from PIL import Image as imageMain
 from PIL.Image import Image
-import tempfile
-import pdf2image
 import cv2
 import numpy as np
 
 # This service contains all OpenCV / PIL / PDF functions that can be reused
 class GraphicsService():
-    def openImagePil(self, imagePath: str) -> Image:
-        return imageMain.open(imagePath)
-
-    def convertPilImageToCvImage(self, pilImage: Image):
-        return cv2.cvtColor(np.array(pilImage), cv2.COLOR_RGB2BGR)
-
-    def convertCvImagetToPilImage(self, cvImage) -> Image:
-        return imageMain.fromarray(cv2.cvtColor(cvImage, cv2.COLOR_BGR2RGB))
-
-    def openImageCv(self, imagePath: str):
-        return self.convertPilImageToCvImage(self.openImagePil(imagePath))
-
     def cvToGrayScale(self, cvImage):
         return cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
 
@@ -123,12 +109,6 @@ class GraphicsService():
         newImage = cv2.warpAffine(newImage, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
         return newImage
 
-    # Render one page of a PDF document to image
-    def renderPdfDocumentPageToImageFromPath(self, pdfDocPath: str, pageNumber: int, dpi: int) -> str:
-        tempFolder = tempfile.gettempdir()
-        pageImagePaths = pdf2image.convert_from_path(pdfDocPath, dpi=dpi, output_folder=tempFolder, fmt='png', paths_only=True, thread_count=1, first_page=pageNumber, last_page=pageNumber)
-        return pageImagePaths[0]
-    
 # =============================================================================
 #     Deskew
 # =============================================================================
