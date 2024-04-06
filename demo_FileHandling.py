@@ -11,23 +11,10 @@ import cv2
 
 relativeInputPath = "in"
 relativeOutputPath = "out"
-FileHandling(relativeInputPath, relativeOutputPath, True) # True is for Debug
-AbsPathParent = FileHandling().getDirParent()
+fih = FileHandling(relativeInputPath, relativeOutputPath, True) # True is for Debug
+AbsPathParent = fih.getDirParent()
 
 res = FileHandling().openAllFiles()
-i = 0
-for img in res:
-    cv2.imshow(str(i), img)
-    i += 1
-# =============================================================================
-# ODER
-# =============================================================================
-fh1 = FileHandling(relativeInputPath, relativeOutputPath)
-fh2 = FileHandling("anderesInput", "andererOutput")
-AbsPathParent = fh1.getDirParent()
-
-res = fh1.openAllFiles()
-res2 = fh2.openAllFiles()
 i = 0
 for img in res:
     cv2.imshow(str(i), img)

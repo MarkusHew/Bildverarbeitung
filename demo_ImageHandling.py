@@ -11,32 +11,44 @@ import cv2
 
 # own functions
 from src.graphics_service import GraphicsService
+from src.file_handling import FileHandling
 # from src.deskew_service import DeskewService
 
             
 def main() :   
+    fih = FileHandling("in/OCRtest", "out")
     grs = GraphicsService()
-
     
-    # path = "F:/.DEV/_Programming/_GitHub/Bildverarbeitung/in/OCRtest/page_01.jpg"
-    # path = "in/OCRtest/index_3.jpg"
-    path = "in/OCRtest/page_01_rotated.jpg"
-    # img = cv2.imread(path)
-    img = grs.openImageCv(path)
+    result = fih.openAllFiles() # function returns img and it's path
+    print(len(result))
+    img, imgpath = result[3]
+    print(img)
+    rescaled = grs.cvApplyRescaling(img, 10)
+    grs.displayImage(img)
+    # grs.displayImage(imgpath)
     
-    # grs.getSkewAngle(img, debug=True)
-    new = img
-    new, angle = grs.deskew(new)
-    cv2.imshow("0", img)
-    # new = grs.cvToBlackWhite(img)
-    cv2.imshow("1", new)
-    # new = grs.cvApplyThickerFont(new, 3)
-    # cv2.imshow("2", new)
-    # new = grs.cvApplyThinnerFont(new, 3)
-    # cv2.imshow("3 ", new)
-    # cv2.imshow("orginal", img)
-    # cv2.imshow("new", new)
-    cv2.waitKey(0)
+    
+# =============================================================================
+#     # path = "F:/.DEV/_Programming/_GitHub/Bildverarbeitung/in/OCRtest/page_01.jpg"
+#     # path = "in/OCRtest/index_3.jpg"
+#     path = "in/OCRtest/page_01_rotated.jpg"
+#     # img = cv2.imread(path)
+#     img = grs.openImageCv(path)
+#     
+#     # grs.getSkewAngle(img, debug=True)
+#     new = img
+#     new, angle = grs.deskew(new)
+#     cv2.imshow("0", img)
+#     # new = grs.cvToBlackWhite(img)
+#     cv2.imshow("1", new)
+#     # new = grs.cvApplyThickerFont(new, 3)
+#     # cv2.imshow("2", new)
+#     # new = grs.cvApplyThinnerFont(new, 3)
+#     # cv2.imshow("3 ", new)
+#     # cv2.imshow("orginal", img)
+#     # cv2.imshow("new", new)
+#     cv2.waitKey(0)
+# =============================================================================
     
     
     return 0

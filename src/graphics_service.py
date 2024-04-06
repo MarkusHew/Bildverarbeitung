@@ -8,25 +8,46 @@
     
 """
 
-from typing import Tuple
-from PIL import Image as imageMain
-from PIL.Image import Image
+from typing import List, Tuple
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+# from src.file_handling import FileHandling
 
-# This service contains all OpenCV / PIL / PDF functions that can be reused
+# This service contains all OpenCV and display functions that can be reused
 class GraphicsService():
-    def cvToGrayScale(self, cvImage):
+    def displayImage(self, path:str):
+        if type(path) is not str:
+            return None
+        dpi = 80
+        im_data = plt.imread(path)
+        height, width = im_data.shape[:2]
+        
+        # What size does the figure need to be in inches to fit the image?
+        figsize = width / float(dpi), height / float(dpi)
+        
+        # Create a figure of the right size with one axes that takes up the full figure
+        fig = plt.figure(figsize=figsize)
+        ax = fig.add_axes([0, 0, 1, 1])
+        
+        # Hide spines, ticks, etc.
+        ax.axis('off')
+        
+        # Display the image.
+        ax.imshow(im_data, cmap='gray')
+        plt.show()
+            
+        return None
+           
+    
+    def cvToGrayScale(self, cvImage): 
         return cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
 
     def cvApplyGaussianBlur(self, cvImage, size: int):
         return cv2.GaussianBlur(cvImage, (size, size), 1)
-# *****************************************************************************
-# extensions Jannis Mathiuet
-# *****************************************************************************
+
     def cvToBlackWhite(self, cvImage, blurSize: int=1):
         # source: https://docs.opencv.org/3.4/d7/d4d/tutorial_py_thresholding.html
-        # 
         gray = self.cvToGrayScale(cvImage)
         blur = self.cvApplyGaussianBlur(gray, blurSize)
         thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
@@ -68,8 +89,13 @@ class GraphicsService():
         cvImage = cv2.bitwise_not(cvImage)
         return cvImage
     
-    def cvApplyRescalling(self):
-        return
+    def cvApplyRescaling(self, cvImage, scale: float=1.0):        
+        rescaledImage = cvImage
+        if (scale < 1.0) : 
+            rescaledImage = cv2.resize(cvImage, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+        if (scale > 1.0) : 
+            rescaledImage = cv2.resize(cvImage, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+        return rescaledImage
     
     def cvRemoveBorders(self, cvImage): 
         # Don't use for PDF!
@@ -80,7 +106,6 @@ class GraphicsService():
         return crop
     def cvAddBorders():
         return None
-# *****************************************************************************  
 
     # Extracts all contours from the image, and resorts them by area (from largest to smallest)
     def cvExtractContours(self, cvImage):
@@ -183,4 +208,3 @@ class GraphicsService():
         # angle = sum([cv2.minAreaRect(largestContour)[-1], cv2.minAreaRect(middleContour)[-1], cv2.minAreaRect(smallestContour)[-1]]) / 3
         #
         # Experiment and find out what works best for your case.
-
