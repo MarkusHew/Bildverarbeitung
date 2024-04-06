@@ -13,6 +13,7 @@ from PIL.Image import Image
 import cv2
 import pdf2image
 import tempfile
+import shutil
 import numpy as np
 
 # =============================================================================
@@ -50,27 +51,45 @@ class FileHandling():
         global DIR_OUTPUT
         return DIR_OUTPUT
     
-
     def getAbsDir(self):
         path = os.getcwd()
         # path = self._removePathEndings(path, remove)
         return path
-
-
-    def editDir(self, path, *folders, remove: np.uint=0) :
+    
+    def editDir(self, path, *folders, remove: np.uint=0, create: bool=False) :
         newpath = self._removePathEndings(path, remove)
         
         folderpath = ""
         for folder in folders :
             banned = ["", " "]
-            if folder != banned: 
+            if folder not in banned: 
                 folderpath = os.path.join(folderpath, folder)
         newpath = os.path.join(path, folderpath)
-        if (os.path.exists(newpath)) is False: 
-            print(f"\nThis path does not exist! Try another one. \n{newpath = }\n")
-            return ""
+        if not (self.checkValidPath(newpath)):
+            if (create): 
+                self.createFolders(newpath)
         return newpath
-
+    
+    def createFolders(self, pathToFolder):
+        if not (self.checkValidPath(pathToFolder)):
+            os.makedirs(pathToFolder)
+        return None
+    
+    def checkValidPath(self, path):
+        if (os.path.exists(path)) is False: 
+            print(f"\nThis path does not currently exist! \n{path = }\n")
+            return False
+        return True
+    
+    # Remove all files/directories inside a folder
+    def clearFolder(self, pathToFolder):
+        for root, dirs, files in os.walk(pathToFolder):
+            for f in files:
+                os.unlink(os.path.join(root, f))
+            for d in dirs:
+                shutil.rmtree(os.path.join(root, d))
+        return None
+    
     # -------------------------------------------------------------------------
     # Path Functions (PRIVATE)
     # -------------------------------------------------------------------------
@@ -113,7 +132,7 @@ class FileHandling():
             return
         imageCv = self._openImageCv(path)
         return imageCv
-
+    
 
     # -------------------------------------------------------------------------
     # Files Functions (PRIVATE)
