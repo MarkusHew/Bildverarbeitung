@@ -15,6 +15,7 @@ import pdf2image
 import tempfile
 import shutil
 import numpy as np
+from typing import List, Tuple
 
 # =============================================================================
 # PUBLIC FUNCTIONS
@@ -115,24 +116,32 @@ class FileHandling():
     # =========================================================================
     # all Functions are inspired from Leo Ertuna
     # source: https://github.com/JPLeoRX/opencv-text-deskew/blob/master/python-service/services/graphics_service.py
-    def openAllFiles(self):
+    def openAllFiles(self) -> List[Tuple]:
         path = self.getDirInput()
         result = []
         for root, dirs, files in os.walk(path):
             for f in files: 
                 filePath = self.editDir(path, str(f))
                 item = self.openOneFile(filePath)
-                result.append(item)
-        
+                result.append((item, filePath)) 
         return result
     
-    def openOneFile(self, path: str=""):
+    def openOneFile(self, path: str):
         if ".pdf" in path:
             print("PDF detected")
             return
         imageCv = self._openImageCv(path)
         return imageCv
     
+    def removeOneFile(self, path: str): 
+        os.remove(path)
+        return
+    
+    def convertPilImageToCvImage(self, pilImage: Image):
+        return cv2.cvtColor(np.array(pilImage), cv2.COLOR_RGB2BGR)
+
+    def convertCvImagetToPilImage(self, cvImage) -> Image:
+        return imageMain.fromarray(cv2.cvtColor(cvImage, cv2.COLOR_BGR2RGB))
 
     # -------------------------------------------------------------------------
     # Files Functions (PRIVATE)
@@ -142,14 +151,8 @@ class FileHandling():
     def _openImagePil(self, imagePath: str) -> Image:
         return imageMain.open(imagePath)
 
-    def _convertPilImageToCvImage(self, pilImage: Image):
-        return cv2.cvtColor(np.array(pilImage), cv2.COLOR_RGB2BGR)
-
-    def _convertCvImagetToPilImage(self, cvImage) -> Image:
-        return imageMain.fromarray(cv2.cvtColor(cvImage, cv2.COLOR_BGR2RGB))
-
     def _openImageCv(self, imagePath: str):
-        return self._convertPilImageToCvImage(self._openImagePil(imagePath))
+        return self.convertPilImageToCvImage(self._openImagePil(imagePath))
     
     # Render one page of a PDF document to image
     def _renderPdfDocumentPageToImageFromPath(self, pdfDocPath: str, pageNumber: int, dpi: int) -> str:
