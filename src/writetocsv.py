@@ -1,6 +1,6 @@
 import csv
 import os
-from path_handling import getAbsDir, editDir
+#from path_handling import getAbsDir, editDir
 
 
 def write_receipts_to_csv(file_name, receipts):

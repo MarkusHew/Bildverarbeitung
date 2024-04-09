@@ -47,11 +47,11 @@ def _removePathEndings(path, cntremove):
     for i in range(cntremove): 
         path, ending = os.path.split(path)
         newpath = path
-    print(newpath)
+    #print(newpath)
     
     return newpath
 
-
+'''
 # =============================================================================
 # TESTING
 # =============================================================================
@@ -63,3 +63,4 @@ def main():
     
 if __name__ == "__main__" :
     main()
+'''
