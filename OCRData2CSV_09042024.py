@@ -246,16 +246,16 @@ Receipt = [
 ]
 
 # Convert the Receipt list to a table format for prompting as a table within the terminal using tabulate
-from tabulate import tabulate # Tabulate package is only installed in the virtual environment PyVEnvImageProcessing, 
+#from tabulate import tabulate # Tabulate package is only installed in the virtual environment PyVEnvImageProcessing, 
 							  # so for this,  preferably execute this PyScript within the terminal with the appropriate VEnv activated!!
-table = tabulate(Receipt, headers="keys", tablefmt="fancy_grid")
+#table = tabulate(Receipt, headers="keys", tablefmt="fancy_grid")
 
 # Print the table
-print(table)
+#print(table)
 
 
-#file_name = f"{receipt_date}_{shop_name}_ReceiptData{date_string}.csv"
-#write_receipt_to_csv(file_name, Receipt)
+file_name = f"{receipt_date}_{shop_name}_ReceiptData{date_string}.csv"
+write_receipt_to_csv(file_name, Receipt)
 
 if __name__ == "__main__":
     main()
