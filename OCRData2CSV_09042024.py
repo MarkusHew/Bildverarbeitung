@@ -50,17 +50,33 @@ def string_to_word_list(input_string):
 
     
 # Function def to extract receipt date for a string-list as OCR-output within a specified range of list elements (start-/end_index): 
+# def extract_receipt_date(ocr_strList):
+    # StartDateIndex_Coop=70
+    # EndDateIndex_Coop=75
+    # date_pattern = r'\b(?:\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{4})\b'
+    # start_index = StartDateIndex_Coop
+    # end_index = EndDateIndex_Coop
+    # for i in range(start_index, end_index + 1):
+        # dates_found = re.findall(date_pattern, ocr_strList[i])
+        # if dates_found:
+            # return dates_found[0]  # Return the first date found
+    # return None  # Return None if no date is found
+    
+# Or rather this version, since safer - should work for any Coop receipt (no matter how long it is)!:
 def extract_receipt_date(ocr_strList):
-    StartDateIndex_Coop=70
-    EndDateIndex_Coop=75
-    date_pattern = r'\b(?:\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{4})\b'
-    start_index = StartDateIndex_Coop
-    end_index = EndDateIndex_Coop
-    for i in range(start_index, end_index + 1):
-        dates_found = re.findall(date_pattern, ocr_strList[i])
-        if dates_found:
-            return dates_found[0]  # Return the first date found
-    return None  # Return None if no date is found
+    date_pattern = r'\b(?:\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{4})\b'  # Date pattern (DD.MM.YY or DD.MM.YYYY)
+    #!!! maybe also to replace by a range instead of a single indesx num, for reliability!!:
+    index_to_check_Coop = -6  # Index of the 6th-last element in the list 
+    
+    # Check the 6th-last element for the date pattern match
+    dates_found = re.findall(date_pattern, ocr_strList[index_to_check_Coop])
+    
+    if dates_found:
+        # Return the date found
+        return dates_found[0]  # Assuming only one date is expected in the element
+    
+    # Return None if no date is found
+    return None    
 
 
 #Func to extract shop adress etc.
@@ -238,24 +254,24 @@ print('\n\n\n')
 
 # Create a dictionary-/key-value-list of the receipt-extractions:
 Receipt = [
-    {"Items": "baked beans", "Amount": "1", "Price [CHF]": total_price},
-    {"Items": "milked cow", "Amount": "1", "Price [CHF]": "20.00"},
-    {"Items": "wonderful girl", "Amount": "3", "Price [CHF]": "2.65"},
-    {"Items": "tree", "Amount": None, "Price [CHF]": 3.80}, 
-    {"": "", "": "", "Total price [CHF]": total_price}
+    {"Items": "baked beans", "Amount": "1", "Price [CHF]": 23.50, "Total price [CHF]": ""},
+    {"Items": "milked cow", "Amount": "1", "Price [CHF]": "20.00", "Total price [CHF]": ""},
+    {"Items": "wonderful girl", "Amount": "3", "Price [CHF]": "2.65", "Total price [CHF]": ""},
+    {"Items": "tree", "Amount": None, "Price [CHF]": 3.80, "Total price [CHF]": ""}, 
+    {"Items": "", "Amount": "", "Price [CHF]": "", "Total price [CHF]": total_price}
 ]
 
 # Convert the Receipt list to a table format for prompting as a table within the terminal using tabulate
-#from tabulate import tabulate # Tabulate package is only installed in the virtual environment PyVEnvImageProcessing, 
+from tabulate import tabulate # Tabulate package is only installed in the virtual environment PyVEnvImageProcessing, 
 							  # so for this,  preferably execute this PyScript within the terminal with the appropriate VEnv activated!!
-#table = tabulate(Receipt, headers="keys", tablefmt="fancy_grid")
+table = tabulate(Receipt, headers="keys", tablefmt="fancy_grid")
 
 # Print the table
-#print(table)
+print(table)
 
 
-file_name = f"{receipt_date}_{shop_name}_ReceiptData{date_string}.csv"
-write_receipt_to_csv(file_name, Receipt)
+#file_name = f"{receipt_date}_{shop_name}_ReceiptData{date_string}.csv"
+#write_receipt_to_csv(file_name, Receipt)
 
 if __name__ == "__main__":
     main()
