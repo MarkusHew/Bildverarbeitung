@@ -17,7 +17,7 @@ from PIL import Image
 import pytesseract
 
 # Setze die Umgebungsvariable TESSDATA_PREFIX
-os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
+#os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
 
 def Bild_skalieren_und_Farbe(img, width):
     height=(int(img.shape[0]*(width/img.shape[1]))) #Bild skalieren auf 1000*xxxx
