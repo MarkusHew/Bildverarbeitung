@@ -1,4 +1,15 @@
-# Import csv-package for craeting csv-file:
+"""
+FHGR, Bildverarbeitung 1
+Project - Receipt reading and transcription to CSV-file
+
+OCRData2CSV Python-code, written by Riaan Kämpfer:
+This code should take in the OCR-generated text-data as a single string or (preferably) already as a string-list
+in order to extract relevant data from the receipt by matching patterns and then writing an according csv-file
+contaiing the relevant data (eg. shop name, receipt-date, firm identificatin number (UID), Items bought, Prices each, total price, etc.)
+
+"""
+
+# Import csv-package for creating csv-file:
 import csv
 
 # Import package for "regular expressions" to define and search string-patterns:
@@ -65,7 +76,7 @@ def string_to_word_list(input_string):
 # Or rather this version, since safer - should work for any Coop receipt (no matter how long it is)!:
 def extract_receipt_date(ocr_strList):
     date_pattern = r'\b(?:\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{4})\b'  # Date pattern (DD.MM.YY or DD.MM.YYYY)
-    #!!! maybe also to replace by a range instead of a single indesx num, for reliability!!:
+    #!!! maybe also to replace by a range instead of a single index num, for reliability!!:
     index_to_check_Coop = -6  # Index of the 6th-last element in the list 
     
     # Check the 6th-last element for the date pattern match
@@ -110,20 +121,81 @@ def extract_total_price(ocr_strList):
     # return matches
     # total_price = 
 
-#Func to extracht UID num
+#Func to extract company identification number / Unternehmens-Identifikationsnummer (UID, eg. CHE-123.456.789) - Coop:
+def extract_UID(ocr_strList):
+	UID_pattern = r'\b\d{3}\.\d{3}\.\d{3}\b' # digit[0-9]=#: ###.###.###, 'CHE-' still needs to be put before this digit-pattern!
+	
+	# Find the index of 'BAR' in the list
+	indexOfElementBAR = ocr_strList.index('BAR')
+	print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
+	# Define the range of indices you want to extract
+	subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
+	subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within bounds
 
-#Func for indices according to the different shop's receipt-patterns
+	# Get the sub-list of elements within the defined range
+	UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
+	
+	# Convert the sub-list to a single string
+	UID_sublist2String = ' '.join(UID_sublist)
+
+	# Check within the sub_list for UID-pattern match
+	UIDs_found = re.findall(UID_pattern, UID_sublist2String)
+    
+	if UIDs_found:
+		# Prepend 'CHE-' to the UID found and return it all together
+		return f'CHE-{UIDs_found[0]}'  # Assuming only one UID is expected in the element
+	
+	# Return None if no UID is found
+	return None
+
+
+#Func for indices according to the different shop's receipt-patterns / -extraction-methods:
 
 
 
-def write_receipt_to_csv(file_name, receipt):
+
+
+# def write_receipt_to_csv(file_name, receipt):
+    # with open(file_name, mode='w', newline='') as csvfile:
+        # datacolumns = receipt[0].keys()
+        # writer = csv.DictWriter(csvfile, fieldnames=datacolumns)
+        # writer.writeheader()
+        # for row in receipt:
+            # writer.writerow(row)
+            
+
+def write_receipts_to_csv(file_name, receipt, ShopName, ShopAddress, uid, ReceiptDate):
+    # Open CSV file in write mode
     with open(file_name, mode='w', newline='') as csvfile:
-        datacolumns = receipt[0].keys()
-        writer = csv.DictWriter(csvfile, fieldnames=datacolumns)
-        writer.writeheader()
-        for row in receipt:
-            writer.writerow(row)
+        # Create a CSV writer object
+        writer = csv.writer(csvfile)
+        
+        # Write the shop name to the CSV file
+        writer.writerow(['Shop Name:', ShopName])
+        # Write the shop address to the CSV file
+        writer.writerow(['Shop Address:', ShopAddress])
+        # Write the shop's UID to the CSV file
+        writer.writerow(['Shop UID:', uid])
+         # Write the receipt date to the CSV file
+        writer.writerow(['Receipt date:', ReceiptDate])
+        
+        # Write an empty row for separation
+        writer.writerow([])
+        
+        # Write the receipt items to the CSV file
+        writer.writerow(['Items', 'Amount', 'Price [CHF]', 'Total Price [CHF]'])
+        for col_element in receipt:
+            writer.writerow([col_element['items'], col_element['amount'], col_element['price [CHF]'], col_element['total price [CHF]']])
 
+
+
+
+
+# For Tesseract Usage on Linux Ubuntu within command line terminal:
+# 1st: activate the Python environment where Tesseract-OCR package is installed
+# 2nd: change to the directory containing the image file to do the OCR-process on.
+# 3rd: Enter following cmd-line: tesseract imageName.png OutputTextfileName -l TextLanguageAbreviation(eg. deu, eng, fra) --dpi NumberOfDPIforOCR(eg. 150)
+# 4th: View the extracted text in the appropriate txt-file. 
 ocr_text = """
 coop
 
@@ -244,21 +316,35 @@ total_price = extract_total_price(ocr_strList)
 
 # Check if the total price is extracted successfully:
 if total_price is not None:
-    print(f'Total price of shopping list items: {total_price} CHF')
+    print(f'Total price of shopping list items: {total_price} CHF \n')
 else:
-    print('Total price not found in the OCR string list.')
+    print('Total price not found in the OCR string list. \n')
 
-
+# Call the extract_UID function:
+shop_UID = extract_UID(ocr_strList)
 
 print('\n\n\n')
 
+
+
+# # Usage example:
+# shop_address = "Solothurn Rosengarten"
+# receipt = [
+    # {"prefix": "baked", "sufix": "beans", "Price [CHF]": "25.95"},
+    # {"prefix": "milked", "sufix": "cow", "Price [CHF]": "20.00"},
+    # {"prefix": "wonderful", "sufix": "girl", "Price [CHF]": "2.65"},
+    # {"prefix": None, "sufix": "tree", "Price [CHF]": "3.80"}
+# ]
+
+
+
 # Create a dictionary-/key-value-list of the receipt-extractions:
 Receipt = [
-    {"Items": "baked beans", "Amount": "1", "Price [CHF]": 23.50, "Total price [CHF]": ""},
-    {"Items": "milked cow", "Amount": "1", "Price [CHF]": "20.00", "Total price [CHF]": ""},
-    {"Items": "wonderful girl", "Amount": "3", "Price [CHF]": "2.65", "Total price [CHF]": ""},
-    {"Items": "tree", "Amount": None, "Price [CHF]": 3.80, "Total price [CHF]": ""}, 
-    {"Items": "", "Amount": "", "Price [CHF]": "", "Total price [CHF]": total_price}
+    {"items": "baked beans", "amount": "1", "price [CHF]": 23.50, "total price [CHF]": ""},
+    {"items": "milked cow", "amount": "1", "price [CHF]": "20.00", "total price [CHF]": ""},
+    {"items": "wonderful girl", "amount": "3", "price [CHF]": "2.65", "total price [CHF]": ""},
+    {"items": "tree", "amount": None, "price [CHF]": 3.80, "total price [CHF]": ""}, 
+    {"items": "", "amount": "", "price [CHF]": "", "total price [CHF]": total_price}
 ]
 
 # Convert the Receipt list to a table format for prompting as a table within the terminal using tabulate
@@ -270,8 +356,11 @@ table = tabulate(Receipt, headers="keys", tablefmt="fancy_grid")
 print(table)
 
 
-#file_name = f"{receipt_date}_{shop_name}_ReceiptData{date_string}.csv"
+file_name = f"{receipt_date}_{shop_name}_ReceiptData{date_string}.csv"
 #write_receipt_to_csv(file_name, Receipt)
+write_receipts_to_csv(file_name, Receipt, shop_name, shopAddress, shop_UID, receipt_date)
+
+
 
 if __name__ == "__main__":
     main()
