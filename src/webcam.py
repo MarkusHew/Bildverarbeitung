@@ -19,8 +19,8 @@ def Bild_aufnehmen(save_path=None):    # change here, to open your preferred web
         print('ERROR: could not open webcam');
     
     # Überprüfe und drucke die maximale Auflösung der Kamera default 640x480
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 3000)#1280
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)#480
     max_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     max_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
     print(f"Maximale Auflösung der Kamera: {max_width} x {max_height}")
@@ -31,8 +31,9 @@ def Bild_aufnehmen(save_path=None):    # change here, to open your preferred web
         if not ret:
             print('ERROR: could not read data from webcam')
             break;
-        
-        cv2.imshow("Press 'q' to quit.", frame)
+        scale=0.3
+        frame_reseice = cv2.resize(frame, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+        cv2.imshow("Press 'q' to quit.", frame_reseice)
         ch = cv2.waitKey(20);
         if ch==ord('q'):
             break;

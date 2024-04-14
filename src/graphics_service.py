@@ -40,7 +40,9 @@ class GraphicsService():
         return None
            
     
-    def cvToGrayScale(self, cvImage): 
+    def cvToGrayScale(self, cvImage):
+        if cvImage.shape[2] <3:
+            return cvImage 
         return cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
 
     def cvApplyGaussianBlur(self, cvImage, size: int):

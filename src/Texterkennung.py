@@ -17,19 +17,16 @@ from PIL import Image
 import pytesseract
 
 # Setze die Umgebungsvariable TESSDATA_PREFIX
-#os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
+os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
 
 def Bild_skalieren_und_Farbe(img, width):
     height=(int(img.shape[0]*(width/img.shape[1]))) #Bild skalieren auf 1000*xxxx
     img_resize=cv2.resize(img,(width,height))
-    if img.shape[2]==1: #Farbkanäle des Eingangsbildes überprüfen und Ausgabebild in Farbe erstellen
-        color_image = cv2.cvtColor(img_resize, cv2.COLOR_GRAY2BGR)
-    else:
-        color_image = img_resize
+    if len(img.shape) > 2: #Farbkanäle des Eingangsbildes überprüfen und Ausgabebild in Farbe erstellen
+        return img_resize
+    print("skalierte Grösse",img_resize.shape)
     
-    print("skalierte Grösse",color_image.shape)
-    
-    return color_image
+    return cv2.cvtColor(img_resize, cv2.COLOR_GRAY2BGR)
 
 def Bildlogo_erstellen(img):    #Methode kann aus einem Bild das Logo extrahieren und abspeichern
     # Verzeichnis zum Speichern der ausgewählten Bildausschnitte
