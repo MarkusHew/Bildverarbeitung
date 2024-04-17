@@ -45,6 +45,9 @@ class GraphicsService():
            
     
     def cvToGrayScale(self, cvImage): 
+        if (len(cvImage.shape) != 3): 
+            print("Grayscale is not applicable")
+            return cvImage
         return cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
 
     def cvApplyGaussianBlur(self, cvImage, size: int):
