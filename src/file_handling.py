@@ -100,16 +100,22 @@ class FileHandling():
     CLASS_DEBUG = False
     
     def _setDirParent(self):
+        global DIR_PARENT
+        DIR_PARENT = self.getAbsDir()
         return self.getAbsDir()
 
     def _setDirInput(self, relpath: str):
         path = self.getDirParent()
         newpath = self.editDir(path, relpath)
+        global DIR_INPUT 
+        DIR_INPUT = newpath
         return newpath
 
     def _setDirOutput(self, relpath: str):
         path = self.getDirParent()
         newpath = self.editDir(path, relpath)
+        global DIR_OUTPUT 
+        DIR_OUTPUT = newpath
         return newpath
     # =========================================================================
     # Files Functions (PUBLIC)
@@ -118,12 +124,24 @@ class FileHandling():
     # source: https://github.com/JPLeoRX/opencv-text-deskew/blob/master/python-service/services/graphics_service.py
     def openAllFiles(self) -> List[Tuple]:
         path = self.getDirInput()
+        result = self.openSearchedFiles() # opens all files
+        return result
+    
+    def openSearchedFiles(self, searchTerm: str=None):
+        subfolderCheck: bool=False
+        
+        path = self.getDirInput()
         result = []
         for root, dirs, files in os.walk(path):
-            for f in files: 
-                filePath = self.editDir(path, str(f))
-                item = self.openOneFile(filePath)
-                result.append((item, filePath)) 
+                for f in files: 
+                    if ((searchTerm in str(f)) or (searchTerm is None)): 
+                        filePath = self.editDir(path, str(f))
+                        item = self.openOneFile(filePath)
+                        result.append((item, filePath)) 
+                if (subfolderCheck is False): 
+                    break
+        if result.empty: 
+            print("No files found")
         return result
     
     def openOneFile(self, path: str):
