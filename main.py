@@ -27,7 +27,7 @@ import src.Texterkennung as tx
 from src.writetocsv import write_receipts_to_csv
 from src.graphics_service import GraphicsService
 from src.file_handling import FileHandling
-#import src.DatatoCsv as cs
+import src.DatatoCsv as cs
 
 
 # Setze die Umgebungsvariable TESSDATA_PREFIX
@@ -128,10 +128,10 @@ else:
 # # print("csv file: ",path)
 # # write_receipts_to_csv(path, result)
 
-# shop_names = cs.extract_shop_names(ocr_text)
-# shop_names_string = '_'.join(shop_names)
-# file_name = f"{receipt_date}_{shop_names_string}_ReceiptData.csv"
-# cs.write_receipt_to_csv(file_name, Receipt)
+shop_names = cs.extract_shop_names(text)
+shop_names_string = '_'.join(shop_names)
+file_name = f"{receipt_date}_{shop_names_string}_ReceiptData.csv"
+cs.write_receipt_to_csv(file_name, Receipt)
 
 # ###########################################    
 # # Ausgabe"
