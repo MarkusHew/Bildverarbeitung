@@ -16,15 +16,24 @@ from src.file_handling import FileHandling
 
             
 def main() :   
-    fih = FileHandling("in/OCRtest", "out")
+    fih = FileHandling("in", "out")
     grs = GraphicsService()
     
     result = fih.openAllFiles() # function returns img and it's path
-    print(len(result))
+    # print(len(result))
     img, imgpath = result[3]
-    print(img)
-    rescaled = grs.cvApplyRescaling(img, 10)
-    grs.displayImage(img)
+    binary = img
+    # binary = grs.cvToGrayScale(img)
+    # binary = grs.cvToBlackWhite(img, 3)
+    binary = grs.rotateImage(binary, 5.)
+    binary, deskewAngle = grs.deskew(binary)
+    print(deskewAngle)
+    # cv2.imwrite("binary.jpg", binary)
+    cv2.imshow("test", binary)
+    # print(img)
+    # rescaled = grs.cvApplyRescaling(img, 10)
+
+    # grs.displayImage(img)
     # grs.displayImage(imgpath)
     
     
