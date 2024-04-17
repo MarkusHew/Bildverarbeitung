@@ -140,7 +140,7 @@ class GraphicsService():
 #     Deskew
 # =============================================================================
     # Deskew image
-    def deskew(self, cvImage) -> Tuple:
+    def deskew(self, cvImage) -> Tuple: #cvMat, angle
         angle = self.getSkewAngle(cvImage)
         print(angle)
         return self.rotateImage(cvImage, -1.0 * angle), angle

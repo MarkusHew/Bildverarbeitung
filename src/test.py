@@ -1,43 +1,68 @@
 import cv2
 import os
+import numpy as np
+from imutils.object_detection import non_max_suppression
+import matplotlib.pyplot as plt
+#%matplotlib inline
 
-# def main():
-#     # Öffnen Sie die Webcam
-#     cap = cv2.VideoCapture(0)  # 0 steht normalerweise für die erste Webcam im System
 
-#     if not cap.isOpened():
-#         print("Fehler: Webcam konnte nicht geöffnet werden.")
-#         return
+current_directory = os.getcwd() #aktuelles Verzeichnis holen
+pfad=current_directory+"in/CoopRechnung2.jpg"
+img = cv2.imread(pfad)
+model=cv2.dnn.readNet('frozen_east_text_detection.pb')
 
-#     while True:
-#         # Erfassen Sie ein Frame von der Webcam
-#         ret, frame = cap.read()
+#Prepare the Image
+#use multiple of 32 to set the new image shape
+height,width,colorch=img.shape
+new_height=(height//32)*32
+new_width=(width//32)*32
+print(new_height,new_width)
 
-#         if not ret:
-#             print("Fehler: Konnte Frame nicht erfassen.")
-#             break
+h_ratio=height/new_height
+w_ratio=width/new_width
+print(h_ratio,w_ratio)
 
-#         # Anzeigen des Kamerabildes
-#         cv2.imshow("Webcam", frame)
+#blob from image helps us to prepare the image
+blob=cv2.dnn.blobFromImage(img,1,(new_width,new_height),(123.68,116.78,103.94),True, False)
+model.setInput(blob)
 
-#         # Beenden des Programms mit der ESC-Taste
-#         if cv2.waitKey(1) == 27:  # ASCII-Code für die ESC-Taste
-#             break
+#this model outputs geometry and score maps
+(geometry,scores)=model.forward(model.getUnconnectedOutLayersNames())
 
-#     # Freigeben der Ressourcen
-#     cap.release()
-#     cv2.destroyAllWindows()
+#once we have done geometry and score maps we have to do post processing to obtain the final text boxes
+rectangles=[]
+confidence_score=[]
+for i in range(geometry.shape[2]):
+    for j in range(0,geometry.shape[3]):
+    
+        if scores[0][0][i][j]<0.1:
+            continue
 
-# if __name__ == "__main__":
-#     main()
+        bottom_x=int(j*4 + geometry[0][1][i][j])
+        bottom_y=int(i*4 + geometry[0][2][i][j])
 
-img = cv2.imread("C:/Users/marku/Documents/StudiumMobileRobotics/6.Semester/Bildverarbeitung1/Github/Bildverarbeitung/img.tif")
-print(img.shape)
+        top_x=int(j*4 - geometry[0][3][i][j])
+        top_y=int(i*4 - geometry[0][0][i][j])
 
-# Aktuelles Verzeichnis
-current_directory = os.getcwd()
-print("Aktuelles Verzeichnis:", current_directory)
+        rectangles.append((top_x,top_y,bottom_x,bottom_y))
+        confidence_score.append(float(scores[0][0][i][j]))
 
-# Eine Ebene nach oben
-parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
-print("Übergeordnetes Verzeichnis:", parent_directory)
+#use nms to get required triangles
+final_boxes=non_max_suppression(np.array(rectangles),probs=confidence_score,overlapThresh=0.5)
+
+#finally to display these text boxes let's iterate over them and convert them to the original shape 
+#using the ratio we calculated earlier
+img_copy=img.copy()
+
+for (x1,y1,x2,y2) in final_boxes:
+    
+    x1=int(x1*w_ratio)
+    y1=int(y1*h_ratio)
+    x2=int(x2*w_ratio)
+    y2=int(y2*h_ratio)
+    
+    #to draw the rectangles on the image use cv2.rectangle function
+    cv2.rectangle(img_copy,(x1,y1),(x2,y2),(0,255,0),2)
+
+cv2.imshow("Bild", img_copy)
+cv2.waitKey(0)

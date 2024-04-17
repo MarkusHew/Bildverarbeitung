@@ -15,6 +15,16 @@ import platform
 import numpy as np
 from PIL import Image
 import pytesseract
+import pandas as pd
+import pprint
+
+# # Überprüfen der aktuellen Optionen
+# print(pd.get_option('display.max_rows'))  # Maximale Anzahl von Zeilen
+# print(pd.get_option('display.max_columns'))  # Maximale Anzahl von Spalten
+
+# Setzen der Optionen auf den Standardwert
+pd.set_option('display.max_rows', None)  # Keine Begrenzung für die Anzahl von Zeilen
+pd.set_option('display.max_columns', None)  # Keine Begrenzung für die Anzahl von Spalten
 
 # Setze die Umgebungsvariable TESSDATA_PREFIX
 os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
@@ -22,14 +32,11 @@ os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hie
 def Bild_skalieren_und_Farbe(img, width):
     height=(int(img.shape[0]*(width/img.shape[1]))) #Bild skalieren auf 1000*xxxx
     img_resize=cv2.resize(img,(width,height))
-    if img.shape[2]==1: #Farbkanäle des Eingangsbildes überprüfen und Ausgabebild in Farbe erstellen
-        color_image = cv2.cvtColor(img_resize, cv2.COLOR_GRAY2BGR)
+    print("skalierte Grösse",img_resize.shape)
+    if len(img.shape) > 2: #Farbkanäle des Eingangsbildes überprüfen und Ausgabebild in Farbe erstellen
+        return img_resize 
     else:
-        color_image = img_resize
-    
-    print("skalierte Grösse",color_image.shape)
-    
-    return color_image
+        return cv2.cvtColor(img_resize, cv2.COLOR_GRAY2BGR)
 
 def Bildlogo_erstellen(img):    #Methode kann aus einem Bild das Logo extrahieren und abspeichern
     # Verzeichnis zum Speichern der ausgewählten Bildausschnitte
@@ -91,6 +98,11 @@ def Bildlogo_erstellen(img):    #Methode kann aus einem Bild das Logo extrahiere
 def textbox(img, Darstellung):   #Methode die mit Textboxen arbeitet und erkannten Text als Liste zurückgibt
     color_image=Bild_skalieren_und_Farbe(img, 1000)
     data = pytesseract.image_to_data(color_image, lang="deu", config='--psm 6', output_type=pytesseract.Output.DICT)    #Bild in Text
+    tab = pytesseract.image_to_data(color_image, lang="deu", config='--psm 6', output_type='data.frame')
+    tab = tab[tab.conf != -1]
+    tab.head()
+    tab.groupby(['block_num','par_num','line_num'])['text'].apply(list)
+
     detected_text=[]
     # Durch die erkannten Textblöcke iterieren und Rechtecke um sie zeichnen
     for i in range(len(data['text'])):
@@ -112,7 +124,30 @@ def textbox(img, Darstellung):   #Methode die mit Textboxen arbeitet und erkannt
     # Bild übergeben
     img_boxes = Bild_skalieren_und_Farbe(color_image, 400)
 
-    return img_boxes, detected_text
+    return img_boxes, detected_text, tab
+
+
+def boundingBox(img, Speicherpfad):
+    color_image=Bild_skalieren_und_Farbe(img, 1000)
+    gray_img = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+    blur=cv2.GaussianBlur(gray_img,(7,7), 0)
+    cv2.imwrite(Speicherpfad+"/in/index_blur.png", blur)
+    thresh=cv2.threshold(blur,0,255,cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+    cv2.imwrite(Speicherpfad+"/in/index_thresh.png", thresh)
+    kernal=cv2.getStructuringElement(cv2.MORPH_RECT, (3,13))
+    dilate=cv2.dilate(thresh,kernal, iterations=1)
+
+    cnts=cv2.findContours(dilate,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts=cnts[0] if len(cnts)==2 else cnts[1]
+    cnts=sorted(cnts, key=lambda x: cv2.boundingRect(x)[0])
+    for c in cnts:
+        x,y,w,h=cv2.boundingRect(c)
+        #if h>50 and w>100:
+        roi=color_image[y:y+h, x:x+h]
+        cv2.rectangle(color_image,(x,y), (x+w,y+h), (36,255,12),2)
+        #ocr_result=pytesseract.image_to_string(roi)
+    #print(ocr_result)   
+    return color_image
 
 
 def logo(img):  #Methode die Logo in Bild erkennt und Shopnamen zuruckgibt
@@ -168,9 +203,20 @@ def main():
         else:
             print("keine Ubereinstimmung")
     if n==3:
-        img_boxes,text=textbox(img,2)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
+        img_boxes,text,tab=textbox(img,2)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
         print("erkannter Text: ",text)
+        print(tab.to_string())
+        #pprint.pprint(tab)
+ 
+        
+
+        
         cv2.imshow('Detected Text', img_boxes)
+        cv2.waitKey(0)
+
+    if n==4:
+        image= boundingBox(img,current_directory)
+        cv2.imshow('bounding boxes', image)
         cv2.waitKey(0)
 
 if __name__ == "__main__" :
