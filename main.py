@@ -35,24 +35,28 @@ os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hie
 
 
 n=2
-current_directory = os.getcwd() #aktuelles Verzeichnis holen
-#print("Aktuelles Verzeichnis:", current_directory)
-save_path=current_directory+"\in"   #Speicherverzeichnis für Webcambild
-print(save_path)
+fih=FileHandling("in","out");
+# current_directory = os.getcwd() #aktuelles Verzeichnis holen
+# #print("Aktuelles Verzeichnis:", current_directory)
+# save_path=current_directory+"\in"   #Speicherverzeichnis für Webcambild
+# print(save_path)
+
 
 if(n==1): #Bild mit Webcam aufnehmen
     # Pfad in welchem das Bild gespeichert wird
-    img=Bild_aufnehmen(save_path)
+    #img=Bild_aufnehmen(save_path)
+    pass
 
 if(n==2): #Bild aus Verzeichnis lesen
     try:
-        # Öffne das Bild mit opencv
-        pfad=current_directory+"in/CoopRechnung2.jpg"
-        img = cv2.imread(pfad)
-        
+        # Öffne das Bild mit opencv        
+        result=fih.openSearchedFiles("Rechnung_Coop.png")        
+        img,pfad = result[0];
+        #pfad=current_directory+"/in/CoopRechnung2.jpg"
 
     except Exception as e:
         print(f"Fehler beim Öffnen des Bildes: {e}")
+
 ###############################################
 
 # # Bild im TIFF-Format speichern
@@ -81,15 +85,16 @@ grs = GraphicsService()
 #result = fih.openAllFiles() # function returns img and it's path
 # print(len(result))
 #img, imgpath = result[3]
-img=cv2.rotate(img,cv2.ROTATE_90_CLOCKWISE)
+#img=cv2.rotate(img,cv2.ROTATE_90_CLOCKWISE)
 #rotate,_=grs.deskew(img) 
-binary = grs.cvToBlackWhite(img, 3)
+binary = grs.cvToBlackWhite(img, 1)
+binary=grs.cvToGrayScale(img)
 #borders= grs.cvRemoveBorders(rotate)
 print(binary.shape)
 cv2.imwrite("binary.tif", binary)
-rescaled = grs.cvApplyRescaling(rotate, 0.3)
-cv2.imshow("Bild binaer und gedreht", rescaled)
-cv2.waitKey(0)
+rescaled = grs.cvApplyRescaling(img, 0.3)
+# cv2.imshow("Bild binaer und gedreht", rescaled)
+# cv2.waitKey(0)
 # print(img)
 # 
 # grs.displayImage(img)
@@ -112,8 +117,9 @@ cv2.waitKey(0)
 # # print(shop_name)
 # #######################################
 # #Methode die mit Textboxen arbeitet
-img_boxes,text=tx.textbox(binary,2)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
+img_boxes,text,tab=tx.textbox(binary,2)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
 print("erkannter Text: ",text)
+print(tab.to_string())
 cv2.imshow('Detected Text', img_boxes)
 cv2.waitKey(0)
 found ,shop_name =tx.logo(img)
@@ -124,14 +130,14 @@ else:
 # ##########################################
 # # schreiben in csv file
 # # path = ph.getAbsDir(remove=1)
-# # path = ph.editDir(path, "out",)
+# # path = ph.editDir(path, "out",)cd
 # # print("csv file: ",path)
 # # write_receipts_to_csv(path, result)
 
-shop_names = cs.extract_shop_names(text)
-shop_names_string = '_'.join(shop_names)
-file_name = f"{receipt_date}_{shop_names_string}_ReceiptData.csv"
-cs.write_receipt_to_csv(file_name, Receipt)
+shop_names_string = '_'.join(shop_name)
+Datum=cs.extract_receipt_date(text)
+file_name = f"{Datum}_{shop_names_string}_ReceiptData.csv"
+cs.write_receipt_to_csv(file_name, text)
 
 # ###########################################    
 # # Ausgabe"

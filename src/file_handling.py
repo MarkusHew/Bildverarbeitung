@@ -140,7 +140,7 @@ class FileHandling():
                         result.append((item, filePath)) 
                 if (subfolderCheck is False): 
                     break
-        if result.empty: 
+        if not result: 
             print("No files found")
         return result
     

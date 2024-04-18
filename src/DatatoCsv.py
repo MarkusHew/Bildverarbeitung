@@ -81,7 +81,7 @@ QL VLAT V5el5 0709) 00384371 001 0001101
 
 # UID_Pattern:
 
-Price_Pattern:
+#Price_Pattern:
 	#.## or ##.##
 	
 # assign price and item-amount to two appropriate vectors (because these vars occure multiple times on one single receipt), sothat the vect-elements can then just be iterated through in the dictionary below.
