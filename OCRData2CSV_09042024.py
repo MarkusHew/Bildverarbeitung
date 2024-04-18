@@ -149,6 +149,240 @@ def extract_UID(ocr_strList):
 	return None
 
 
+# group string-list elements in range [dict_StartIndex:dict_EndIndex] to line-sublists
+# Until 'TOTAL' is not reached, from and excl. 'Total' onwards, search for first next digit (integer), append that with previous line-sublist-elements until and excl. 'Total' or until and excl. previous digit-element (as 1st line-sublist-element) and append next 3 elements (that should be digits, maybe floats) to line-sublist_i
+def generate_line_sublists(ocr_strList):
+    # Find the index of 'Total' and 'TOTAL' in the list
+    index_of_Total = ocr_strList.index('Total')
+    index_of_TOTAL = ocr_strList.index('TOTAL')
+    
+    # Initialize a list to hold all line sublists
+    line_sublists = []
+    
+    # Iterate over the indices between 'Total' and 'TOTAL'
+    start_index = index_of_Total + 1
+    end_index = index_of_TOTAL - 1
+    i = start_index
+    
+    while i <= end_index:
+        # Initialize a sublist for the current line
+        line_sublist = []
+        
+        # Collect elements until encountering a non-numeric string or reaching the end of the range
+        while i <= end_index and not ocr_strList[i].isdigit() and ocr_strList[i] != 'TOTAL':
+            line_sublist.append(ocr_strList[i])
+            i += 1
+        
+        # Add elements until encountering the next non-numeric string or reaching the end of the range
+        while i <= end_index and (ocr_strList[i].isdigit() or ocr_strList[i] == '.' or ocr_strList[i] == '0'):
+            line_sublist.append(ocr_strList[i])
+            i += 1
+        
+        # Append the collected line sublist to the list of line sublists
+        line_sublists.append(line_sublist)
+    
+    # Group even-indexed line sublists with odd-indexed line sublists
+    combined_line_sublists = []
+    for j in range(0, len(line_sublists) - 1, 2):
+        combined_line_sublists.append(line_sublists[j] + line_sublists[j + 1])
+    
+    return combined_line_sublists
+
+# # Generate combined line sublists
+# combined_line_sublists = generate_line_sublists(ocr_strList)
+
+# # Print the combined line sublists
+# for i, combined_line_sublist in enumerate(combined_line_sublists, start=1):
+    # print(f"combined_line_sublist_{i}: {combined_line_sublist}")
+
+
+
+# def generate_line_sublists(ocr_strList):
+    # # Find the index of 'Total' and 'TOTAL' in the list
+    # index_of_Total = ocr_strList.index('Total')
+    # index_of_TOTAL = ocr_strList.index('TOTAL')
+    
+    # # Initialize a list to hold all line sublists
+    # line_sublists = []
+    
+    # # Iterate over the indices between 'Total' and 'TOTAL'
+    # start_index = index_of_Total + 1
+    # end_index = index_of_TOTAL - 1
+    # i = start_index
+    
+    # while i <= end_index:
+        # # Initialize a sublist for the current line
+        # line_sublist = []
+        
+        # # Collect elements until encountering a non-numeric string or reaching the end of the range
+        # while i <= end_index and not ocr_strList[i].isdigit() and ocr_strList[i] != 'TOTAL':
+            # line_sublist.append(ocr_strList[i])
+            # i += 1
+        
+        # # Add elements until encountering the next non-numeric string or reaching the end of the range
+        # while i <= end_index and (ocr_strList[i].isdigit() or ocr_strList[i] == '.' or ocr_strList[i] == '0'):
+            # line_sublist.append(ocr_strList[i])
+            # i += 1
+        
+        # # Add the collected line sublist to the list of line sublists
+        # line_sublists.append(line_sublist)
+    
+    # return line_sublists
+
+
+# def generate_line_sublists(ocr_strList):
+    # # Find the index of 'Total' and 'TOTAL' in the list
+    # index_of_Total = ocr_strList.index('Total')
+    # index_of_TOTAL = ocr_strList.index('TOTAL')
+    
+    # # Initialize a list to hold all line sublists
+    # line_sublists = []
+    
+    # # Iterate over the indices between 'Total' and 'TOTAL'
+    # start_index = index_of_Total + 1
+    # end_index = index_of_TOTAL - 1
+    # i = start_index
+    
+    # while i <= end_index:
+        # # Initialize a sublist for the current line
+        # line_sublist = []
+        
+        # # Collect the first non-numeric string (excluding 'TOTAL') as the start of the line sublist
+        # while i <= end_index and (ocr_strList[i].isdigit() or ocr_strList[i] == 'TOTAL'):
+            # i += 1
+        
+        # # Add the first non-numeric string to the current line sublist
+        # if i <= end_index:
+            # line_sublist.append(ocr_strList[i])
+            # i += 1
+        
+        # # Collect subsequent numeric values until encountering a non-numeric string (excluding 'TOTAL')
+        # while i <= end_index and (ocr_strList[i].isdigit() or ocr_strList[i] == '.'):
+            # line_sublist.append(ocr_strList[i])
+            # i += 1
+        
+        # # Add the collected line sublist to the list of line sublists
+        # line_sublists.append(line_sublist)
+    
+    # return line_sublists
+
+
+# def generate_line_sublists(ocr_strList):
+    # # Find the index of 'Total' and 'TOTAL' in the list
+    # index_of_Total = ocr_strList.index('Total')
+    # index_of_TOTAL = ocr_strList.index('TOTAL')
+    
+    # # Initialize a list to hold all line sublists
+    # line_sublists = []
+    
+    # # Iterate over the indices between 'Total' and 'TOTAL'
+    # start_index = index_of_Total + 1
+    # end_index = index_of_TOTAL - 1
+    # i = start_index
+    
+    # while i <= end_index:
+        # # Initialize a sublist for the current line
+        # line_sublist = []
+        
+        # # Collect elements for the current line until encountering a numeric value or any string except 'TOTAL'
+        # while i <= end_index and (ocr_strList[i].isdigit() or (ocr_strList[i] != 'TOTAL' and not ocr_strList[i].isalpha())):
+            # line_sublist.append(ocr_strList[i])
+            # i += 1
+        
+        # # Add the collected line sublist to the list of line sublists
+        # line_sublists.append(line_sublist)
+        
+        # # Move to the next element
+        # i += 1
+    
+    # return line_sublists
+
+# # Generate line sublists
+# line_sublists = generate_line_sublists(ocr_strList)
+
+# # Print the line sublists
+# for i, line_sublist in enumerate(line_sublists, start=1):
+    # print(f"line_sublist_{i}: {line_sublist}")
+
+
+
+
+
+# def generate_line_sublists(ocr_strList):
+    # # Find the indices of 'Total' and 'TOTAL'
+    # start_index = ocr_strList.index('Total')
+    # end_index = ocr_strList.index('TOTAL')
+    
+    # # Extract the relevant part of the list
+    # relevant_part = ocr_strList[start_index + 1:end_index]
+    
+    # line_sublists = []
+    # current_sublist = []
+
+    # for item in relevant_part:
+        # current_sublist.append(item)
+        
+        # # Check if the item is a digit (integer or float)
+        # if re.match(r'^-?\d+(\.\d+)?$', item):  # Regular expression to match integer or float numbers
+            # line_sublists.append(current_sublist)
+            # current_sublist = []  # Reset the current sublist
+    
+    # # Append the last incomplete sublist if any
+    # if current_sublist:
+        # line_sublists.append(current_sublist)
+    
+    # return line_sublists
+
+    # # # line_sublists = []
+    # # # start_index = ocr_strList.index('Total') + 1
+    # # # end_index = ocr_strList.index('TOTAL') - 1
+
+    # # # i = start_index
+    # # # while i <= end_index:
+        # # # line_sublist = []
+        # # # while i <= end_index and not ocr_strList[i].isdigit():
+            # # # line_sublist.append(ocr_strList[i])
+            # # # i += 1
+        # # # line_sublists.append(line_sublist)
+        # # # i += 1
+
+    # # # return line_sublists
+
+
+# # Call the function to generate line_sublists
+# line_sublists = generate_line_sublists(ocr_strList)
+
+# # Print the generated line_sublists
+# for i, sublist in enumerate(line_sublists, 1):
+    # print(f"line_sublist_{i}: {sublist}")
+
+
+
+# Generate dictionary for shop item details:
+def generate_dictionary(ocr_strList):
+	# Find the indices of 'Total' and 'TOTAL' in the list
+	dict_StartIndex = ocr_strList.index('Total')
+	dict_EndIndex = ocr_strList.index('TOTAL')
+
+	# Extract relevant elements for the dictionary
+	items = ocr_strList[dict_StartIndex + 1:dict_EndIndex]  # Elements between 'Total' and 'TOTAL'
+	amount = items[0]  # Assuming the first element after 'Total' is the amount
+	price_chf = items[1]  # Assuming the second element after 'Total' is the price in CHF
+	total_price_chf = items[2]  # Assuming the third element after 'Total' is the total price in CHF
+
+	# Create the dictionary
+	receipt_dict = {
+		'items': ' '.join(items),
+		'amount': amount,
+		'price [CHF]': price_chf,
+		'total price [CHF]': total_price_chf
+	}
+
+	# Print the resulting dictionary
+	print(receipt_dict)
+
+
+
 #Func for indices according to the different shop's receipt-patterns / -extraction-methods:
 
 
@@ -356,9 +590,35 @@ table = tabulate(Receipt, headers="keys", tablefmt="fancy_grid")
 print(table)
 
 
-file_name = f"{receipt_date}_{shop_name}_ReceiptData{date_string}.csv"
+
+# Generate combined line sublists
+combined_line_sublists = generate_line_sublists(ocr_strList)
+
+# Print the combined line sublists
+for i, combined_line_sublist in enumerate(combined_line_sublists, start=1):
+    print(f"combined_line_sublist_{i}: {combined_line_sublist}")
+
+# # Call the function to generate line_sublists
+# line_sublists = generate_line_sublists(ocr_strList)
+
+# # Print the generated line_sublists
+# for i, sublist in enumerate(line_sublists, 1):
+    # print(f"line_sublist_{i}: {sublist}")
+
+# # Generate line sublists
+# line_sublists = generate_line_sublists(ocr_strList)
+
+# # Print the line sublists
+# for i, line_sublist in enumerate(line_sublists, start=1):
+    # print(f"line_sublist_{i}: {line_sublist}")
+
+
+
+
+
+#file_name = f"{receipt_date}_{shop_name}_ReceiptData{date_string}.csv"
 #write_receipt_to_csv(file_name, Receipt)
-write_receipts_to_csv(file_name, Receipt, shop_name, shopAddress, shop_UID, receipt_date)
+#write_receipts_to_csv(file_name, Receipt, shop_name, shopAddress, shop_UID, receipt_date)
 
 
 
