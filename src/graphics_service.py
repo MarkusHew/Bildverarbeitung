@@ -18,32 +18,37 @@ import matplotlib.pyplot as plt
 class GraphicsService():
     def displayImage(self, path:str):
         if type(path) is not str:
-            return None
-        dpi = 80
-        im_data = plt.imread(path)
-        height, width = im_data.shape[:2]
-        
-        # What size does the figure need to be in inches to fit the image?
-        figsize = width / float(dpi), height / float(dpi)
-        
-        # Create a figure of the right size with one axes that takes up the full figure
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_axes([0, 0, 1, 1])
-        
-        # Hide spines, ticks, etc.
-        ax.axis('off')
-        
-        # Display the image.
-        ax.imshow(im_data, cmap='gray')
-        plt.show()
+            try: 
+                cv2.imshow("img", path)
+            except:
+                print("not image or path")
+        else: 
+            dpi = 80
+            im_data = plt.imread(path)
+            height, width = im_data.shape[:2]
+            
+            # What size does the figure need to be in inches to fit the image?
+            figsize = width / float(dpi), height / float(dpi)
+            
+            # Create a figure of the right size with one axes that takes up the full figure
+            fig = plt.figure(figsize=figsize)
+            ax = fig.add_axes([0, 0, 1, 1])
+            
+            # Hide spines, ticks, etc.
+            ax.axis('off')
+            
+            # Display the image.
+            ax.imshow(im_data, cmap='gray')
+            plt.show()
             
         return None
            
     
     def cvToGrayScale(self, cvImage): 
-        if len(cvImage.shape) == 3: # check, if image has a color channel
-            return cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
-        return cvImage
+        if (len(cvImage.shape) != 3): 
+            print("Grayscale is not applicable")
+            return cvImage
+        return cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
 
     def cvApplyGaussianBlur(self, cvImage, size: int):
         return cv2.GaussianBlur(cvImage, (size, size), 1)
@@ -103,9 +108,11 @@ class GraphicsService():
         # Don't use for PDF!
         # Don't use for automated task
         contours = self.cvExtractContours(cvImage)
-        x, y, w, h = cv2.boundingRect(contours)
+        largestContour = contours[0]
+        x, y, w, h = cv2.boundingRect(largestContour)
         crop = cvImage[y:y+h, x:x+w]
         return crop
+    
     def cvAddBorders():
         return None
 
@@ -140,25 +147,24 @@ class GraphicsService():
 #     Deskew
 # =============================================================================
     # Deskew image
-    def deskew(self, cvImage) -> Tuple: #cvMat, angle
-        angle = self.getSkewAngle(cvImage)
-        print(angle)
-        return self.rotateImage(cvImage, -1.0 * angle), angle
+    def deskew(self, cvImage) -> Tuple:
+        skewangle = self.getSkewAngle(cvImage, True)
+        # print(angle)
+        # return self.rotateImage(cvImage, -1.0 * angle), angle
+        return self.rotateImage(cvImage, -1.0 * skewangle)
 
     # Calculate skew angle of an image
     def getSkewAngle(self, cvImage, debug: bool = False) -> float:
         # Prep image, copy, convert to gray scale, blur, and threshold
         newImage = cvImage.copy()
-        
-        thresh = self.cvToBlackWhite(newImage, 11)
-        # gray = self.cvToGrayScale(newImage)
-        # blur = self.cvApplyGaussianBlur(gray, 11)
+        # gray = GraphicsService().cvToGrayScale(newImage)
+        # blur = GraphicsService().cvApplyGaussianBlur(gray, 11)
         # thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+        thresh = self.cvToBlackWhite(newImage, 11)
         if debug:
             # cv2.imshow('Gray', gray)
             # cv2.imshow('Blur', blur)
             cv2.imshow('Thresh', thresh)
-            # cv2.waitKey()
 
         # Apply dilate to merge text into meaningful lines/paragraphs.
         # Use larger kernel on X axis to merge characters into single line, cancelling out any spaces.
@@ -167,24 +173,22 @@ class GraphicsService():
         dilate = cv2.dilate(thresh, kernel, iterations=3)          # TODO: what does this interations influence? higher Number worse results?
         if debug:
             cv2.imshow('Dilate', dilate)
-            # cv2.waitKey()
 
         # Find all contours
         contours = self.cvExtractContours(dilate)
         if debug:
             temp1 = cv2.drawContours(newImage.copy(), contours, -1, (255, 0, 0), 2)
             cv2.imshow('All Contours', temp1)
-            # cv2.waitKey()
 
         # Find largest contour and surround in min area box
         largestContour = contours[0]
+        print(largestContour)
         minAreaRect = cv2.minAreaRect(largestContour)
         if debug:
             minAreaRectContour = np.int0(cv2.boxPoints(minAreaRect))
             temp2 = cv2.drawContours(newImage.copy(), [minAreaRectContour], -1, (255, 0, 0), 2)
             cv2.imshow('Largest Contour', temp2)
-            cv2.waitKey()
-
+            
         # Determine the angle. Convert it to the value that was originally used to obtain skewed image
         angle = minAreaRect[-1]
         if angle < -45:

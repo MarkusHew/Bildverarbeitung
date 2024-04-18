@@ -20,19 +20,15 @@ def main() :
     grs = GraphicsService()
     
     result = fih.openAllFiles() # function returns img and it's path
-    # print(len(result))
-    img, imgpath = result[3]
-    binary = img
-    # binary = grs.cvToGrayScale(img)
-    # binary = grs.cvToBlackWhite(img, 3)
-    binary = grs.rotateImage(binary, 5.)
-    binary, deskewAngle = grs.deskew(binary)
-    print(deskewAngle)
-    # cv2.imwrite("binary.jpg", binary)
-    cv2.imshow("test", binary)
+    print(len(result))
+    img, imgpath = result[0]
+    img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
     # print(img)
-    # rescaled = grs.cvApplyRescaling(img, 10)
-
+    # rescaled = grs.cvApplyRescaling(img, 0.5)
+    img = grs.cvToBlackWhite(img, 10)
+    # img = grs.deskew(img)
+    # img = grs.cvApplyThickerFont(img, 2)
+    img = grs.cvRemoveBorders(img)
     # grs.displayImage(img)
     # grs.displayImage(imgpath)
     
