@@ -1,4 +1,5 @@
 import csv
+<<<<<<< Updated upstream
 #import Real Expressions package to define and search string-patterns:
 import re
 
@@ -41,10 +42,19 @@ def write_receipt_to_csv(file_name, receipt):
     with open(file_name, mode='w', newline='') as csvfile:
         # Set the column names to a list:
         datacolumns = receipt[0].keys()  # Get column names from the first item's keys
+=======
+
+def write_receipts_to_csv(file_name, receipts):
+    # Make and open new csv file
+    with open(file_name, mode='w', newline='') as csvfile:
+        # Set the column names to a list:
+        datacolumns = receipts[0].keys()  # Get column names from the first item's keys
+>>>>>>> Stashed changes
         
         writer = csv.DictWriter(csvfile, fieldnames=datacolumns)
         
         writer.writeheader()  # Write the header row with column names
+<<<<<<< Updated upstream
         for row in receipt:  # Iterate through the list
             writer.writerow(row)  # Write each dictionary as a row
 
@@ -102,11 +112,20 @@ print("Milliseconds since epoch:",milliseconds)
 # Create List of receipts
 Receipt = [
     {"Item": "baked", "sufix": "beans", "Price [CHF]": "25.95"},
+=======
+        for row in receipts:  # Iterate through the list
+            writer.writerow(row)  # Write each dictionary as a row
+
+# Create List of receipts
+Receipts = [
+    {"prefix": "baked", "sufix": "beans", "Price [CHF]": "25.95"},
+>>>>>>> Stashed changes
     {"prefix": "milked", "sufix": "cow", "Price [CHF]": "20.00"},
     {"prefix": "wonderful", "sufix": "girl", "Price [CHF]": "2.65"},
     {"prefix": None, "sufix": "tree", "Price [CHF]": 3.80}
 ]
 
+<<<<<<< Updated upstream
 #%% Get OCR output for shop's name and receipt date
 # Extract the shop name(s) from the OCR text:
 shop_names = extract_shop_names(ocr_text) # Incase there are accidentally multiple shop names detected we handle this case appropriately. 
@@ -129,3 +148,14 @@ file_name = f"{receipt_date}_{shop_names_string}_ReceiptData.csv"
 
 # Call the function to write the receipt to CSV file
 write_receipt_to_csv(file_name, Receipt)
+=======
+# Get OCR output for shop's name and receipt date
+shop_name = "ShopNamefromOCR"
+receipt_date = "ReceiptDatefromOCR"
+
+# Construct file name based on OCR output
+file_name = f"{shop_name}_{receipt_date}_ReceiptData.csv"
+
+# Call the function to write the receipts to CSV file
+write_receipts_to_csv(file_name, Receipts)
+>>>>>>> Stashed changes

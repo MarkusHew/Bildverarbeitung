@@ -85,6 +85,7 @@ grs = GraphicsService()
 #result = fih.openAllFiles() # function returns img and it's path
 # print(len(result))
 #img, imgpath = result[3]
+<<<<<<< Updated upstream
 #img=cv2.rotate(img,cv2.ROTATE_90_CLOCKWISE)
 #rotate,_=grs.deskew(img) 
 binary = grs.cvToBlackWhite(img, 1)
@@ -97,6 +98,15 @@ rescaled = grs.cvApplyRescaling(img, 0.3)
 # cv2.waitKey(0)
 # print(img)
 # 
+=======
+binary = grs.cvToBlackWhite(img, 3) 
+#cv2.imwrite("binary.jpg", binary)
+
+# print(img)
+rescaled = grs.cvApplyRescaling(binary, 0.3)
+cv2.imshow("schwarz-weiss: ", rescaled)
+cv2.waitKey(0)
+>>>>>>> Stashed changes
 # grs.displayImage(img)
 # grs.displayImage(imgpath)
 ################################################################
@@ -140,9 +150,9 @@ file_name = f"{Datum}_{shop_names_string}_ReceiptData.csv"
 cs.write_receipt_to_csv(file_name, text)
 
 # ###########################################    
-# # Ausgabe"
-# #print("Erkannter Text:", text)
-# print(result)
+# Ausgabe"
+#print("Erkannter Text:", text)
+print(result)
 # # print("Abstände zwischen den Wörtern:", word_distances)
 # # for w,d in zip(words,word_distances):
 # #     print(w,d,"\n")
