@@ -50,10 +50,14 @@ class GraphicsService():
             return cvImage
         return cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
 
-    def cvApplyGaussianBlur(self, cvImage, size: int):
-        return cv2.GaussianBlur(cvImage, (size, size), 1)
+    def cvApplyGaussianBlur(self, cvImage, blurSize: int=1):
+        if (blurSize == 0): return cvImage
+        if (blurSize < 0):  blurSize *= -1
+        if (blurSize % 2) == 0: # reduce even to next odd number (kernel has to be odd)
+            blurSize -= 1
+        return cv2.GaussianBlur(cvImage, (blurSize, blurSize), 1)
 
-    def cvToBlackWhite(self, cvImage, blurSize: int=1):
+    def cvToBlackWhite(self, cvImage, blurSize: int=0):
         # source: https://docs.opencv.org/3.4/d7/d4d/tutorial_py_thresholding.html
         gray = self.cvToGrayScale(cvImage)
         blur = self.cvApplyGaussianBlur(gray, blurSize)
@@ -149,9 +153,10 @@ class GraphicsService():
     # Deskew image
     def deskew(self, cvImage) -> Tuple:
         skewangle = self.getSkewAngle(cvImage, True)
-        # print(angle)
-        # return self.rotateImage(cvImage, -1.0 * angle), angle
+        print(skewangle)
+        # return self.rotateImage(cvImage, -1.0 * angle), skewangle
         return self.rotateImage(cvImage, -1.0 * skewangle)
+    
 
     # Calculate skew angle of an image
     def getSkewAngle(self, cvImage, debug: bool = False) -> float:
@@ -161,6 +166,7 @@ class GraphicsService():
         # blur = GraphicsService().cvApplyGaussianBlur(gray, 11)
         # thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
         thresh = self.cvToBlackWhite(newImage, 11)
+        # thresh = cv2.bitwise_not(thresh)
         if debug:
             # cv2.imshow('Gray', gray)
             # cv2.imshow('Blur', blur)
@@ -170,8 +176,9 @@ class GraphicsService():
         # Apply dilate to merge text into meaningful lines/paragraphs.
         # Use larger kernel on X axis to merge characters into single line, cancelling out any spaces.
         # But use smaller kernel on Y axis to separate between different blocks of text
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 5)) # TODO: what does this influence?
-        dilate = cv2.dilate(thresh, kernel, iterations=11)          # TODO: what does this interations influence? higher Number worse results?
+        factor = 1
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30*factor, 5)) # TODO: what does this influence?
+        dilate = cv2.dilate(thresh, kernel, iterations=1)          # TODO: what does this interations influence? higher Number worse results?
         if debug:
             cv2.imshow('Dilate', dilate)
 

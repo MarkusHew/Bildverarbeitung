@@ -122,25 +122,25 @@ class FileHandling():
     # =========================================================================
     # all Functions are inspired from Leo Ertuna
     # source: https://github.com/JPLeoRX/opencv-text-deskew/blob/master/python-service/services/graphics_service.py
-    def openAllFiles(self, subfolderCheck: bool=False) -> List[Tuple]:
+    def openAllFiles(self) -> List[Tuple]:
         path = self.getDirInput()
         result = self.openSearchedFiles() # opens all files
         return result
     
-    def openSearchedFiles(self, searchTerm: str=None):
+    def openSearchedFiles(self, searchTerm: str=None)  -> List[Tuple]:
         subfolderCheck: bool=False
         
         path = self.getDirInput()
         result = []
         for root, dirs, files in os.walk(path):
                 for f in files: 
-                    if ((searchTerm in str(f)) or (searchTerm is None)): 
+                    if ((searchTerm is None) or (searchTerm in str(f))): 
                         filePath = self.editDir(path, str(f))
                         item = self.openOneFile(filePath)
                         result.append((item, filePath)) 
                 if (subfolderCheck is False): 
                     break
-        if result.empty: 
+        if not result: 
             print("No files found")
         return result
     

@@ -25,10 +25,12 @@ def main() :
     img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
     # print(img)
     # rescaled = grs.cvApplyRescaling(img, 0.5)
-    img = grs.cvToBlackWhite(img, 10)
-    # img = grs.deskew(img)
+    # img = grs.cvToBlackWhite(img, 2)
+    img = grs.deskew(img)
     # img = grs.cvApplyThickerFont(img, 2)
-    img = grs.cvRemoveBorders(img)
+# =============================================================================
+#     img = grs.cvRemoveBorders(img)
+# =============================================================================
     # grs.displayImage(img)
     # grs.displayImage(imgpath)
     
