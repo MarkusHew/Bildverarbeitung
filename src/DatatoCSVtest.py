@@ -82,22 +82,9 @@ def extract_receipt_date(ocr_strList):
     #!!! maybe also to replace by a range instead of a single index num, for reliability!!:
     #index_to_check_Coop = -6  # Index of the 6th-last element in the list 
     
-    # # Define the range of indices to check
-    # theor_date_index = -6  # Index of the 6th-last element in the list, where the coop-date usually is
-    # DateCheck_StartIndex = theor_date_index - 4  # Start index of the range to check for date-pattern
-    # DateCheck_EndIndex = len(ocr_strList) - 1  # Global End index
-    
-    # # Iterate over the specified range of indices
-    # for i in range(DateCheck_StartIndex, DateCheck_EndIndex + 1):
-    #     # Check the element at the current index for the date pattern match
-    #     dates_found = re.findall(date_pattern, ocr_strList[i])
-
-
-
-
     # Check the 6th-last element for the date pattern match
     for i in range(len(ocr_strList)):
-        print(ocr_strList[i])
+        #print(ocr_strList[i])
         dates_found = re.findall(date_pattern, ocr_strList[i])
         #print("Test",dates_found)
         if dates_found:        
