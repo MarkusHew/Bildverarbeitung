@@ -27,14 +27,15 @@ import src.Texterkennung as tx
 from src.writetocsv import write_receipts_to_csv
 from src.graphics_service import GraphicsService
 from src.file_handling import FileHandling
-import src.DatatoCsv as cs
+import src.DatatoCSV as cs
 
 
 # Setze die Umgebungsvariable TESSDATA_PREFIX
 os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
-
+verz= os.getcwd()
 
 n=2
+
 fih=FileHandling("in","out");
 # current_directory = os.getcwd() #aktuelles Verzeichnis holen
 # #print("Aktuelles Verzeichnis:", current_directory)
@@ -85,7 +86,6 @@ grs = GraphicsService()
 #result = fih.openAllFiles() # function returns img and it's path
 # print(len(result))
 #img, imgpath = result[3]
-<<<<<<< Updated upstream
 #img=cv2.rotate(img,cv2.ROTATE_90_CLOCKWISE)
 #rotate,_=grs.deskew(img) 
 binary = grs.cvToBlackWhite(img, 1)
@@ -98,15 +98,6 @@ rescaled = grs.cvApplyRescaling(img, 0.3)
 # cv2.waitKey(0)
 # print(img)
 # 
-=======
-binary = grs.cvToBlackWhite(img, 3) 
-#cv2.imwrite("binary.jpg", binary)
-
-# print(img)
-rescaled = grs.cvApplyRescaling(binary, 0.3)
-cv2.imshow("schwarz-weiss: ", rescaled)
-cv2.waitKey(0)
->>>>>>> Stashed changes
 # grs.displayImage(img)
 # grs.displayImage(imgpath)
 ################################################################
@@ -129,10 +120,9 @@ cv2.waitKey(0)
 # #Methode die mit Textboxen arbeitet
 img_boxes,text,tab=tx.textbox(binary,2)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
 print("erkannter Text: ",text)
-print(tab.to_string())
-cv2.imshow('Detected Text', img_boxes)
-cv2.waitKey(0)
-found ,shop_name =tx.logo(img)
+#print(tab.to_string())
+
+found ,shop_name =tx.logo(img, verz)
 if found:
     print("Rechnung von: ",shop_name)
 else:
@@ -144,18 +134,20 @@ else:
 # # print("csv file: ",path)
 # # write_receipts_to_csv(path, result)
 
-shop_names_string = '_'.join(shop_name)
 Datum=cs.extract_receipt_date(text)
-file_name = f"{Datum}_{shop_names_string}_ReceiptData.csv"
-cs.write_receipt_to_csv(file_name, text)
+file_name = f"{Datum}_{shop_name}_ReceiptData.csv"
+cs.write_receipts_to_csv(file_name, text)
+print("Datum", Datum)
 
 # ###########################################    
 # Ausgabe"
 #print("Erkannter Text:", text)
-print(result)
+#print(result)
 # # print("Abstände zwischen den Wörtern:", word_distances)
 # # for w,d in zip(words,word_distances):
 # #     print(w,d,"\n")
+# cv2.imshow('Detected Text', img_boxes)
+# cv2.waitKey(0)
 # cv2.waitKey(0)
 
 

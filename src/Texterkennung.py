@@ -150,15 +150,13 @@ def boundingBox(img, Speicherpfad):
     return color_image
 
 
-def logo(img):  #Methode die Logo in Bild erkennt und Shopnamen zuruckgibt
-    current_directory = os.getcwd()
-    print("Aktuelles Verzeichnis:", current_directory)
-    parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
-    shop_names={"Coop":"Logo_Coop.png","Volg":"LogoVolg.png"}
+def logo(img, pfad):  #Methode die Logo in Bild erkennt und Shopnamen zuruckgibt    
+    print("Aktuelles Verzeichnis:", pfad)
+    shop_names={"Coop":"Logo_Coop.png","Volg":"Logo_Volg.png"}
     found_shop=None
     for key,value in shop_names.items():
         color_image=Bild_skalieren_und_Farbe(img, 400)
-        template = cv2.imread(parent_directory+'/in/'+value)             
+        template = cv2.imread(pfad+ '\\in\\'+value)
         w, h = template.shape[0], template.shape[1]
         res = cv2.matchTemplate(color_image, template, cv2.TM_CCOEFF_NORMED)
         threshold = .8
@@ -180,13 +178,13 @@ def logo(img):  #Methode die Logo in Bild erkennt und Shopnamen zuruckgibt
 # =============================================================================
 # TESTING
 # =============================================================================
-def main():
-    n=3 # 1:Shoplogo abspeichern, 2:Logo erkennen, 3: Text erkennen und ausgeben
-    try: #Bild öffnen aus ubergeordnetem Verzeichnis
+def main():    
+    n=2 # 1:Shoplogo abspeichern, 2:Logo erkennen, 3: Text erkennen und ausgeben
+    try: #Bild öffnen aus ubergeordnetem Verzeichnis        
         current_directory = os.getcwd()
         print("Aktuelles Verzeichnis:", current_directory)
         parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
-        Verzeichnis=os.path.join(parent_directory,"in", "Rechnung_Volg.jpg")
+        Verzeichnis=os.path.join(parent_directory,"in", "Rechnung_Coop.png")
         img = cv2.imread(Verzeichnis)
         print(img.shape)  
 
@@ -197,7 +195,7 @@ def main():
     if n==1:
         Bildlogo_erstellen(img)
     if n==2:
-        found ,shop_name =logo(img)
+        found ,shop_name =logo(img, parent_directory)
         if found:
             print("Rechnung von: ",shop_name)
         else:
@@ -206,9 +204,7 @@ def main():
         img_boxes,text,tab=textbox(img,2)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
         print("erkannter Text: ",text)
         print(tab.to_string())
-        #pprint.pprint(tab)
- 
-        
+        #pprint.pprint(tab)    
 
         
         cv2.imshow('Detected Text', img_boxes)
