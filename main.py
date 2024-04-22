@@ -51,7 +51,7 @@ if(n==1): #Bild mit Webcam aufnehmen
 if(n==2): #Bild aus Verzeichnis lesen
     try:
         # Öffne das Bild mit opencv        
-        result=fih.openSearchedFiles("Rechnung_Coop.png")        
+        result=fih.openSearchedFiles("Rechnung_Volg.jpg")        
         img,pfad = result[0];
         #pfad=current_directory+"/in/CoopRechnung2.jpg"
 
@@ -136,7 +136,7 @@ else:
 
 Datum=cs.extract_receipt_date(text)
 file_name = f"{Datum}_{shop_name}_ReceiptData.csv"
-cs.write_receipts_to_csv(file_name, text)
+#cs.write_receipts_to_csv(file_name, text)
 print("Datum", Datum)
 
 # ###########################################    
