@@ -31,7 +31,7 @@ import src.DatatoCSV as cs
 
 
 # Setze die Umgebungsvariable TESSDATA_PREFIX
-os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
+os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #Pfad muss auf jeweiligen Rechner angepasst werden #hier sind die Sprachdateien
 verz= os.getcwd()
 
 n=2
@@ -51,7 +51,8 @@ if(n==1): #Bild mit Webcam aufnehmen
 if(n==2): #Bild aus Verzeichnis lesen
     try:
         # Öffne das Bild mit opencv        
-        result=fih.openSearchedFiles("Rechnung_Volg.jpg")        
+        result=fih.openSearchedFiles("CoopReceipt_scan_2024-04-12_11-24-29.jpg")#CoopReceipt_scan_2024-04-12_11-24-29.jpg        
+        #Rechnung_Volg.jpg
         img,pfad = result[0];
         #pfad=current_directory+"/in/CoopRechnung2.jpg"
 
@@ -146,8 +147,8 @@ print("Datum", Datum)
 # # print("Abstände zwischen den Wörtern:", word_distances)
 # # for w,d in zip(words,word_distances):
 # #     print(w,d,"\n")
-# cv2.imshow('Detected Text', img_boxes)
-# cv2.waitKey(0)
+cv2.imshow('Detected Text', img_boxes)
+cv2.waitKey(0)
 # cv2.waitKey(0)
 
 
