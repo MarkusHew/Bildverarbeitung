@@ -32,6 +32,9 @@ import src.DatatoCSV as cs
 
 # Setze die Umgebungsvariable TESSDATA_PREFIX
 os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #Pfad muss auf jeweiligen Rechner angepasst werden #hier sind die Sprachdateien
+# Fuer Linux Ubuntu:
+# os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata" # Pfad wo die Tesseract-Sprachdateien abgelegt sind!
+
 verz= os.getcwd()
 
 n=2
