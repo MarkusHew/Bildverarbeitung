@@ -26,8 +26,6 @@ import pprint
 pd.set_option('display.max_rows', None)  # Keine Begrenzung für die Anzahl von Zeilen
 pd.set_option('display.max_columns', None)  # Keine Begrenzung für die Anzahl von Spalten
 
-# Setze die Umgebungsvariable TESSDATA_PREFIX
-os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
 
 def Bild_skalieren_und_Farbe(img, width):
     height=(int(img.shape[0]*(width/img.shape[1]))) #Bild skalieren auf 1000*xxxx
@@ -179,6 +177,11 @@ def logo(img, pfad):  #Methode die Logo in Bild erkennt und Shopnamen zuruckgibt
 # TESTING
 # =============================================================================
 def main():    
+    
+    # Setze die Umgebungsvariable TESSDATA_PREFIX
+    os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
+    #os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata" # Fuer Linux Ubuntu
+    
     n=2 # 1:Shoplogo abspeichern, 2:Logo erkennen, 3: Text erkennen und ausgeben
     try: #Bild öffnen aus ubergeordnetem Verzeichnis        
         current_directory = os.getcwd()
