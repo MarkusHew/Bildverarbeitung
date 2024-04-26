@@ -1,8 +1,8 @@
 '''
 @data:      Texterkennung.py
 @author:    Markus Hewel
-@versions:  ver 0.0.0 - 09.04.2024, 25.04.2024(minor changes for OS-dependant EnvVars, Riaan Kaempfer)
-@desc: 
+@versions:  ver 0.0.0 - 09.04.2024, 25./26.04.2024
+@desc: 25./26.04.2024: Minor changes for OS-dependant EnvVar-path-assignment and correct Logo-Frame-display in Image, Riaan Kaempfer
     Funktionen: - Bild skalieren auf beliebige Breite
                 - Ein Logo auf einer Rechnung als Bildausschnitt erfassen und abspeichern
                 - Ein Geschaftslogo auf einer Rechnung erkennen
