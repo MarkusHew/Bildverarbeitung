@@ -1,7 +1,7 @@
 """
 @data:      main.py
 @author:    Markus Hewel
-@versions:  ver 0.0.0 - 01.04.2024
+@versions:  ver 0.0.0 - 01.04.2024, 25.04.2024(minor changes for OS-dependant EnvVar-path-assignment, Riaan Kaempfer)
 @desc: 
     Bild aus Verzeichnis oder von Webcam oeffenen
     Bild in Graubild wandeln und mit opencv optimieren
@@ -29,8 +29,21 @@ from src.file_handling import FileHandling
 import src.DatatoCSV as cs
 
 
-# Setze die Umgebungsvariable TESSDATA_PREFIX
-os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #Pfad muss auf jeweiligen Rechner angepasst werden #hier sind die Sprachdateien
+# Setze die Umgebungsvariable TESSDATA_PREFIX Betriebssystemabhängig
+# (Pfad wo die Tesseract-Sprachdateien abgelegt sind!)
+if os.name == "posix":  # Linux or MacOS
+    # Fuer Linux Ubuntu:
+    os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata" # Pfad wo die Tesseract-Sprachdateien abgelegt sind!
+    print("Fuer Linux gesetzter Pfad der Umgebungsvariable 'TESSDATA_PREFIX':", os.environ["TESSDATA_PREFIX"])
+elif os.name == "nt":  # Windows
+    os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #Pfad muss auf jeweiligen Rechner angepasst werden #hier sind die Sprachdateien
+    print("Fuer Windows gesetzter Pfad der Umgebungsvariable 'TESSDATA_PREFIX':", os.environ["TESSDATA_PREFIX"])
+else:
+    os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata"
+    print("Unknown operating system. Assuming Linux system.")
+    print("Gesetzter Pfad der Umgebungsvariable 'TESSDATA_PREFIX':", os.environ["TESSDATA_PREFIX"])
+
+
 verz= os.getcwd()
 
 n=2

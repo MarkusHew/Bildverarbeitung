@@ -75,29 +75,58 @@ def string_to_word_list(input_string):
         # if dates_found:
             # return dates_found[0]  # Return the first date found
     # return None  # Return None if no date is found
+
+
+
+
+# def extract_receipt_date(ocr_strList):
+    # date_pattern = r'\b(?:\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{4})\b'  # Date pattern (DD.MM.YY or DD.MM.YYYY)
+    # #!!! maybe also to replace by a range instead of a single index num, for reliability!!:
+    # #index_to_check_Coop = -6  # Index of the 6th-last element in the list 
     
+    # # Check the 6th-last element for the date pattern match
+    # for i in range(len(ocr_strList)):
+        # #print(ocr_strList[i])
+        # dates_found = re.findall(date_pattern, ocr_strList[i])
+        # #print("Test",dates_found)
+        # if dates_found:        
+            # # Return the date found
+            # return dates_found[0]  # Assuming only one date is expected in the element
+    
+    # #Return None if no date is found
+    # return None    
+
 # Or rather this version, since safer - should work for any Coop receipt (no matter how long it is)!:
 def extract_receipt_date(ocr_strList):
     date_pattern = r'\b(?:\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{4})\b'  # Date pattern (DD.MM.YY or DD.MM.YYYY)
-    #!!! maybe also to replace by a range instead of a single index num, for reliability!!:
-    #index_to_check_Coop = -6  # Index of the 6th-last element in the list 
-    
+    # Check within an index-range instead of a single index num, for reliability!!:
+    ###index_to_check_Coop = -6  # Index of the 6th-last element in the list 
     # Check the 6th-last element for the date pattern match
-    for i in range(len(ocr_strList)):
-        #print(ocr_strList[i])
+    ###dates_found = re.findall(date_pattern, ocr_strList[index_to_check_Coop])
+    
+    # Define the range of indices to check
+    theor_date_index = -6  # Index of the 6th-last element in the list, where the coop-date usually is
+    DateCheck_StartIndex = theor_date_index - 4  # Start index of the range to check for date-pattern
+    DateCheck_EndIndex = len(ocr_strList) - 1  # Global End index
+    
+    # Iterate over the specified range of indices
+    for i in range(DateCheck_StartIndex, DateCheck_EndIndex + 1):
+        # Check the element at the current index for the date pattern match
         dates_found = re.findall(date_pattern, ocr_strList[i])
-        #print("Test",dates_found)
-        if dates_found:        
+
+        if dates_found:
             # Return the date found
             return dates_found[0]  # Assuming only one date is expected in the element
-    
-    #Return None if no date is found
-    return None    
+        
+    # Return None if no date is found
+    return None
+
+
 
 
 #Func to extract shop adress etc.
 def extract_shop_address(ocr_strList):
-    shop_address = " ".join(ocr_strList[5:7]) # Extract the address elements from ocr_strList-indices 5 and 6
+    shop_address = " ".join(ocr_strList[8:11]) # Extract the address elements from ocr_strList-indices 5 and 6
     return shop_address
 
 #Func to extract total price
@@ -135,7 +164,7 @@ def extract_UID(ocr_strList):
 	print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
 	# Define the range of indices you want to extract
 	subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
-	subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within bounds
+	subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within global bounds
 
 	# Get the sub-list of elements within the defined range
 	UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
@@ -155,7 +184,10 @@ def extract_UID(ocr_strList):
 
 
 # group string-list elements in range [dict_StartIndex:dict_EndIndex] to line-sublists
-# Until 'TOTAL' is not reached, from and excl. 'Total' onwards, search for first next digit (integer), append that with previous line-sublist-elements until and excl. 'Total' or until and excl. previous digit-element (as 1st line-sublist-element) and append next 3 elements (that should be digits, maybe floats) to line-sublist_i
+# Until 'TOTAL' is not reached, from and excl. 'Total' onwards, search for first next digit (integer), 
+# append that with previous line-sublist-elements until and excl. 'Total' or until and 
+# excl. previous digit-element (as 1st line-sublist-element) and append next 
+# 3 elements (that should be digits, maybe floats) to line-sublist_i
 def generate_line_sublists(ocr_strList):
     # Find the index of 'Total' and 'TOTAL' in the list
     index_of_Total = ocr_strList.index('Total')
@@ -171,20 +203,20 @@ def generate_line_sublists(ocr_strList):
     
     while i <= end_index:
         # Initialize a sublist for the current line
-        line_sublist = []
+        currentLine_sublist = []
         
         # Collect elements until encountering a non-numeric string or reaching the end of the range
         while i <= end_index and not ocr_strList[i].isdigit() and ocr_strList[i] != 'TOTAL':
-            line_sublist.append(ocr_strList[i])
+            currentLine_sublist.append(ocr_strList[i])
             i += 1
         
         # Add elements until encountering the next non-numeric string or reaching the end of the range
         while i <= end_index and (ocr_strList[i].isdigit() or ocr_strList[i] == '.' or ocr_strList[i] == '0'):
-            line_sublist.append(ocr_strList[i])
+            currentLine_sublist.append(ocr_strList[i])
             i += 1
         
         # Append the collected line sublist to the list of line sublists
-        line_sublists.append(line_sublist)
+        line_sublists.append(currentLine_sublist)
     
     # Group even-indexed line sublists with odd-indexed line sublists
     combined_line_sublists = []
