@@ -16,7 +16,6 @@ Bild an pytasseract übergeben und in Text umwandeln
 Text als Liste übergeben und in csv-file abspeichern
 
 """
-
 import os
 import cv2
 import platform
