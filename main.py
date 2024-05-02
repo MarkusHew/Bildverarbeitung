@@ -144,7 +144,10 @@ if found:
     print("Rechnung von: ",shop_name)
 else:
     print("keine Ubereinstimmung")
+
+
 # ##########################################
+# Programm von Riaan Kaempfer
 # # schreiben in csv file
 # # path = ph.getAbsDir(remove=1)
 # # path = ph.editDir(path, "out",)cd
@@ -186,19 +189,19 @@ date_string = now.strftime("%d%m%Y_%H;%M;%S")
     
 
 # Create a dictionary-/key-value-list of the receipt-extractions:
-Receipt = [
-{"items": "baked beans", "amount": "1", "price [CHF]": 23.50, "total price [CHF]": ""},
-{"items": "milked cow", "amount": "1", "price [CHF]": "20.00", "total price [CHF]": ""},
-{"items": "wonderful girl", "amount": "3", "price [CHF]": "2.65", "total price [CHF]": ""},
-{"items": "tree", "amount": None, "price [CHF]": 3.80, "total price [CHF]": ""}, 
-{"items": "", "amount": "", "price [CHF]": "", "total price [CHF]": total_price}
-]
+# Receipt = [
+# {"items": "baked beans", "amount": "1", "price [CHF]": 23.50, "total price [CHF]": ""},
+# {"items": "milked cow", "amount": "1", "price [CHF]": "20.00", "total price [CHF]": ""},
+# {"items": "wonderful girl", "amount": "3", "price [CHF]": "2.65", "total price [CHF]": ""},
+# {"items": "tree", "amount": None, "price [CHF]": 3.80, "total price [CHF]": ""}, 
+# {"items": "", "amount": "", "price [CHF]": "", "total price [CHF]": total_price}
+# ]
 
 # Convert the Receipt list to a table format for prompting as a table within the terminal using tabulate
-table = cs.tabulate(Receipt, headers="keys", tablefmt="fancy_grid")
+#table = cs.tabulate(Receipt, headers="keys", tablefmt="fancy_grid")
 
 # Print the table
-print(table)
+#print(table)
 
 # Generate combined line sublists
 combined_line_sublists = cs.generate_line_sublists(text)
@@ -214,9 +217,11 @@ for i, combined_line_sublist in enumerate(combined_line_sublists, start=1):
 #cs.write_receipts_to_csv(file_name, text)
 #print("Datum", Datum)
 
-# Call CSV-file-writing funct.:
+# Construct the file path for the CSV-file and call CSV-file-writing funct.:
 file_name = f"{receipt_date}_{shop_name}_ReceiptData{date_string}.csv"
-cs.write_receipts_to_csv(file_name, Receipt, shop_name, shopAddress, shop_UID, receipt_date)
+folder_name = 'out'
+file_path = os.path.join(folder_name, file_name)
+cs.write_receipts_to_csv(file_path, combined_line_sublists, total_price, shop_name, shopAddress, shop_UID, receipt_date)
 
 
 # ###########################################    
