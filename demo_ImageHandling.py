@@ -26,7 +26,9 @@ def main() :
     # print(img)
     # rescaled = grs.cvApplyRescaling(img, 0.5)
     # img = grs.cvToBlackWhite(img, 2)
-    img = grs.deskew(img)
+    # img = grs.deskew(img)
+    crop = grs.cvRemoveBorders(img)
+    grs.displayImage(crop)
     # img = grs.cvApplyThickerFont(img, 2)
 # =============================================================================
 #     img = grs.cvRemoveBorders(img)

@@ -114,6 +114,9 @@ class GraphicsService():
         contours = self.cvExtractContours(cvImage)
         largestContour = contours[0]
         x, y, w, h = cv2.boundingRect(largestContour)
+        
+        print(cv2.boundingRect(largestContour))
+        # crop = cvImage
         crop = cvImage[y:y+h, x:x+w]
         return crop
     
@@ -122,7 +125,8 @@ class GraphicsService():
 
     # Extracts all contours from the image, and resorts them by area (from largest to smallest)
     def cvExtractContours(self, cvImage):
-        contours, hierarchy = cv2.findContours(cvImage, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        blwh = self.cvToBlackWhite(cvImage, 3);
+        contours, hierarchy = cv2.findContours(blwh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key = cv2.contourArea, reverse = True)
         return contours
 
@@ -192,8 +196,8 @@ class GraphicsService():
 
         # Find largest contour and surround in min area box
         largestContour = contours[0]
-        print(largestContour)
         minAreaRect = cv2.minAreaRect(largestContour)
+        print(minAreaRect)
         if debug:
             minAreaRectContour = np.int0(cv2.boxPoints(minAreaRect))
             temp2 = cv2.drawContours(newImage.copy(), [minAreaRectContour], -1, (255, 0, 0), 2)
