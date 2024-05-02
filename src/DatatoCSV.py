@@ -24,10 +24,10 @@ from tabulate import tabulate # Tabulate package is only installed in the virtua
 
 
 # Function to convert ocr-text (as a single string) to a list of strings:
-def string_to_word_list(input_string):
-    # Split the input string into words
-    word_list = input_string.split()
-    return word_list
+# def string_to_word_list(input_string):
+    # # Split the input string into words
+    # word_list = input_string.split()
+    # return word_list
 
 # # Example usage
 # input_string = "Hello world! This is a sample string."
@@ -160,7 +160,7 @@ def extract_UID(ocr_strList):
 	UID_pattern = r'\b\d{3}\.\d{3}\.\d{3}\b' # digit[0-9]=#: ###.###.###, 'CHE-' still needs to be put before this digit-pattern!
 	
 	# Find the index of 'BAR' in the list
-	indexOfElementBAR = ocr_strList.index('BAR')
+	indexOfElementBAR = ocr_strList.index('DAR')
 	print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
 	# Define the range of indices you want to extract
 	subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
@@ -434,20 +434,83 @@ def generate_dictionary(ocr_strList):
         # for row in receipt:
             # writer.writerow(row)
             
-
-def write_receipts_to_csv(file_name, receipt, ShopName, ShopAddress, uid, ReceiptDate):
-    # Open CSV file in write mode
-    with open(file_name, mode='w', newline='') as csvfile:
-        # Create a CSV writer object
-        writer = csv.writer(csvfile)
+######### ###### ######
+# def write_receipts_to_csv(file_name, receipt, ShopName, ShopAddress, uid, ReceiptDate):
+    # # Open CSV file in write mode
+    # with open(file_name, mode='w', newline='') as csvfile:
+        # # Create a CSV writer object
+        # writer = csv.writer(csvfile)
         
+        # # Write the shop name to the CSV file
+        # writer.writerow(['Shop Name:', ShopName])
+        # # Write the shop address to the CSV file
+        # writer.writerow(['Shop Address:', ShopAddress])
+        # # Write the shop's UID to the CSV file
+        # writer.writerow(['Shop UID:', uid])
+         # # Write the receipt date to the CSV file
+        # writer.writerow(['Receipt date:', ReceiptDate])
+        
+        # # Write an empty row for separation
+        # writer.writerow([])
+        
+        # # Write the receipt items to the CSV file
+        # writer.writerow(['Items', 'Amount', 'Price [CHF]', 'Total Price [CHF]'])
+        # for col_element in receipt:
+            # writer.writerow([col_element['items'], col_element['amount'], col_element['price [CHF]'], col_element['total price [CHF]']])
+
+
+
+
+
+# def write_receipts_to_csv(file_name, combined_line_sublists, ShopName, ShopAddress, uid, ReceiptDate):
+    # # Open CSV file in write mode
+    # with open(file_name, mode='w', newline='') as csvfile:
+        # # Create a CSV writer object
+        # writer = csv.writer(csvfile)
+        
+        # # Write the shop name to the CSV file
+        # writer.writerow(['Shop Name:', ShopName])
+        # # Write the shop address to the CSV file
+        # writer.writerow(['Shop Address:', ShopAddress])
+        # # Write the shop's UID to the CSV file
+        # writer.writerow(['Shop UID:', uid])
+         # # Write the receipt date to the CSV file
+        # writer.writerow(['Receipt date:', ReceiptDate])
+        
+        # # Write an empty row for separation
+        # writer.writerow([])
+        
+        # # Write the receipt items to the CSV file
+        # writer.writerow(['Items', 'Amount', 'Price [CHF]', 'Total Price [CHF]'])
+        
+        # # Iterate over combined_line_sublists
+        # for sublist in combined_line_sublists:
+            # # Extract relevant elements for each sublist
+            # items = sublist[0]
+            # amount = sublist[1]
+            # price_chf = sublist[2]
+            # total_price_chf = sublist[3]
+            
+            # # Write the extracted elements to the CSV file
+            # writer.writerow([items, amount, price_chf, total_price_chf])
+            
+def write_receipts_to_csv(file_path, combined_line_sublists, total_price_chf, ShopName, ShopAddress, uid, ReceiptDate):
+    # Open CSV file in write mode
+    with open(file_path, mode='w', newline='') as csvfile:
+        # Create a CSV writer object
+        try:
+            writer = csv.writer(csvfile)
+            print("csv file erstellt in Verzeichnis: ", file_path)
+        except Exception as e:
+            print(f"Fehler beim erstellen des csv files: {e}")
+
         # Write the shop name to the CSV file
         writer.writerow(['Shop Name:', ShopName])
         # Write the shop address to the CSV file
         writer.writerow(['Shop Address:', ShopAddress])
         # Write the shop's UID to the CSV file
         writer.writerow(['Shop UID:', uid])
-         # Write the receipt date to the CSV file
+        # Write the receipt date to the CSV file
         writer.writerow(['Receipt date:', ReceiptDate])
         
         # Write an empty row for separation
@@ -455,9 +518,40 @@ def write_receipts_to_csv(file_name, receipt, ShopName, ShopAddress, uid, Receip
         
         # Write the receipt items to the CSV file
         writer.writerow(['Items', 'Amount', 'Price [CHF]', 'Total Price [CHF]'])
-        for col_element in receipt:
-            writer.writerow([col_element['items'], col_element['amount'], col_element['price [CHF]'], col_element['total price [CHF]']])
-
+        
+        # Iterate over combined_line_sublists
+        for sublist_of_CoLiSu in combined_line_sublists:
+            # Initialize variables
+            items = ''
+            amount = ''
+            price_chf = ''
+            found_amount = False
+            found_price = False
+            
+            # Iterate over elements in the sublist_of_CoLiSu
+            for i in range(len(sublist_of_CoLiSu)):
+                # If the element contains digits, it's either 'Amount' or 'Price [CHF]'
+                if re.search(r'\d', sublist_of_CoLiSu[i]):
+                    if not found_amount:
+                        amount = sublist_of_CoLiSu[i]
+                        found_amount = True
+                    elif not found_price:
+                        price_chf = sublist_of_CoLiSu[i]
+                        found_price = True
+                        # Since we only need the first amount and price_chf, we break after finding them
+                        break
+                 # If the element is a string, concatenate it to the 'items' string
+                else:
+                    items += sublist_of_CoLiSu[i] + ' '
+            
+            # Write the extracted elements to the CSV file
+            writer.writerow([items.strip(), amount, price_chf, ''])
+# Write an empty row for separation
+        writer.writerow([])
+        
+        # Write the total price to the CSV file
+        writer.writerow(['', '', '', total_price_chf])
+      
 
 # =============================================================================
 # TESTING
@@ -656,6 +750,7 @@ def main():
     #file_name = f"{receipt_date}_{shop_name}_ReceiptData{date_string}.csv"
     #write_receipt_to_csv(file_name, Receipt)
     #write_receipts_to_csv(file_name, Receipt, shop_name, shopAddress, shop_UID, receipt_date)
+    write_receipts_to_csv(file_path, combined_line_sublists, total_price, shop_name, shopAddress, shop_UID, receipt_date)
 
 
 

@@ -147,31 +147,6 @@ def boundingBox(img, Speicherpfad):
     #print(ocr_result)   
     return color_image
 
-
-#def logo(img, pfad):  #Methode die Logo in Bild erkennt und Shopnamen zuruckgibt    
-#    print("Aktuelles Verzeichnis:", pfad)
-#    shop_names={"Coop":"Logo_Coop.png","Volg":"Logo_Volg.png"}
-#    found_shop=None
-#    for key,value in shop_names.items():
-#        color_image=Bild_skalieren_und_Farbe(img, 400)
-#        template = cv2.imread(pfad+ '\\in\\'+value)
-#        w, h = template.shape[0], template.shape[1]
-#        res = cv2.matchTemplate(color_image, template, cv2.TM_CCOEFF_NORMED)
-#        threshold = .8
-#        loc = np.where(res >= threshold)
-#        if loc[0].size > 0:  # Wenn ein Ubereinstimmung gefunden wurde
-#            found_shop = key
-#            # Markieren des gefundenen Bereichs im Bild
-#            for pt in zip(*loc[::-1]):
-#                cv2.rectangle(color_image, pt, (pt[0] + h, pt[1] + w), (0, 0, 255), 2) # Changed by Riaan: flipped location of w and h in this code line for correct display!
-#            
-#            cv2.imshow('Ausschnitt in bild gefunden', color_image)
-#            cv2.imshow('template', template)
-#            cv2.waitKey(0)
-#            return True, found_shop     
-#          
-#    return False, None
-
 def logo(img, pfad):  # OS-sensitive Methode die Logo in Bild erkennt und Shopnamen zuruckgibt 
     print("Aktuelles Verzeichnis:", pfad)
     shop_names = {"Coop": "Logo_Coop.png", "Volg": "Logo_Volg.png"}
@@ -203,7 +178,7 @@ def logo(img, pfad):  # OS-sensitive Methode die Logo in Bild erkennt und Shopna
             
             # Highlight the found area in the image
             for pt in zip(*loc[::-1]):
-                cv2.rectangle(color_image, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
+                cv2.rectangle(color_image, pt, (pt[0] + h, pt[1] + w), (0, 0, 255), 2)
             
             cv2.imshow('Ausschnitt in bild gefunden', color_image)
             cv2.imshow('template', template)
