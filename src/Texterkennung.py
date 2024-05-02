@@ -163,7 +163,7 @@ def boundingBox(img, Speicherpfad):
 #            found_shop = key
 #            # Markieren des gefundenen Bereichs im Bild
 #            for pt in zip(*loc[::-1]):
-                cv2.rectangle(color_image, pt, (pt[0] + h, pt[1] + w), (0, 0, 255), 2) # Changed by Riaan: flipped location of w and h in this code line for correct display!
+#                cv2.rectangle(color_image, pt, (pt[0] + h, pt[1] + w), (0, 0, 255), 2) # Changed by Riaan: flipped location of w and h in this code line for correct display!
 #            
 #            cv2.imshow('Ausschnitt in bild gefunden', color_image)
 #            cv2.imshow('template', template)
