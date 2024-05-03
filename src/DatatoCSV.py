@@ -157,30 +157,30 @@ def extract_total_price(ocr_strList):
 
 #Func to extract company identification number / Unternehmens-Identifikationsnummer (UID, eg. CHE-123.456.789) - Coop:
 def extract_UID(ocr_strList):
-	UID_pattern = r'\b\d{3}\.\d{3}\.\d{3}\b' # digit[0-9]=#: ###.###.###, 'CHE-' still needs to be put before this digit-pattern!
-	
-	# Find the index of 'BAR' in the list
-	indexOfElementBAR = ocr_strList.index('DAR')
-	print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
-	# Define the range of indices you want to extract
-	subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
-	subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within global bounds
-
-	# Get the sub-list of elements within the defined range
-	UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
-	
-	# Convert the sub-list to a single string
-	UID_sublist2String = ' '.join(UID_sublist)
-
-	# Check within the sub_list for UID-pattern match
-	UIDs_found = re.findall(UID_pattern, UID_sublist2String)
+    UID_pattern = r'\b\d{3}\.\d{3}\.\d{3}\b' # digit[0-9]=#: ###.###.###, 'CHE-' still needs to be put before this digit-pattern!
     
-	if UIDs_found:
-		# Prepend 'CHE-' to the UID found and return it all together
-		return f'CHE-{UIDs_found[0]}'  # Assuming only one UID is expected in the element
-	
-	# Return None if no UID is found
-	return None
+    # Find the index of 'BAR' in the list
+    indexOfElementBAR = ocr_strList.index('DAR')
+    print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
+    # Define the range of indices you want to extract
+    subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
+    subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within global bounds
+
+    # Get the sub-list of elements within the defined range
+    UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
+    
+    # Convert the sub-list to a single string
+    UID_sublist2String = ' '.join(UID_sublist)
+
+    # Check within the sub_list for UID-pattern match
+    UIDs_found = re.findall(UID_pattern, UID_sublist2String)
+    
+    if UIDs_found:
+        # Prepend 'CHE-' to the UID found and return it all together
+        return f'CHE-{UIDs_found[0]}'  # Assuming only one UID is expected in the element
+    
+    # Return None if no UID is found
+    return None
 
 
 # group string-list elements in range [dict_StartIndex:dict_EndIndex] to line-sublists
@@ -397,26 +397,26 @@ def generate_line_sublists(ocr_strList):
 
 # Generate dictionary for shop item details:
 def generate_dictionary(ocr_strList):
-	# Find the indices of 'Total' and 'TOTAL' in the list
-	dict_StartIndex = ocr_strList.index('Total')
-	dict_EndIndex = ocr_strList.index('TOTAL')
+    # Find the indices of 'Total' and 'TOTAL' in the list
+    dict_StartIndex = ocr_strList.index('Total')
+    dict_EndIndex = ocr_strList.index('TOTAL')
 
-	# Extract relevant elements for the dictionary
-	items = ocr_strList[dict_StartIndex + 1:dict_EndIndex]  # Elements between 'Total' and 'TOTAL'
-	amount = items[0]  # Assuming the first element after 'Total' is the amount
-	price_chf = items[1]  # Assuming the second element after 'Total' is the price in CHF
-	total_price_chf = items[2]  # Assuming the third element after 'Total' is the total price in CHF
+    # Extract relevant elements for the dictionary
+    items = ocr_strList[dict_StartIndex + 1:dict_EndIndex]  # Elements between 'Total' and 'TOTAL'
+    amount = items[0]  # Assuming the first element after 'Total' is the amount
+    price_chf = items[1]  # Assuming the second element after 'Total' is the price in CHF
+    total_price_chf = items[2]  # Assuming the third element after 'Total' is the total price in CHF
 
-	# Create the dictionary
-	receipt_dict = {
-		'items': ' '.join(items),
-		'amount': amount,
-		'price [CHF]': price_chf,
-		'total price [CHF]': total_price_chf
-	}
+    # Create the dictionary
+    receipt_dict = {
+        'items': ' '.join(items),
+        'amount': amount,
+        'price [CHF]': price_chf,
+        'total price [CHF]': total_price_chf
+    }
 
-	# Print the resulting dictionary
-	print(receipt_dict)
+    # Print the resulting dictionary
+    print(receipt_dict)
 
 
 
@@ -659,11 +659,11 @@ def main():
     #%% Time-code; Current date and time:
     # datetime object containing current date and time
     # now = datetime.now()
-    # print("now =", now) # Output:	 now = 2022-12-27 10:09:20.430322
+    # print("now =", now) # Output:     now = 2022-12-27 10:09:20.430322
 
     # dd/mm/YY H:M:S
     # dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    # print("date and time =", dt_string) #Output:	 date and time = 27/12/2022 10:09:20
+    # print("date and time =", dt_string) #Output:     date and time = 27/12/2022 10:09:20
 
     now = datetime.now()
     date_string = now.strftime("%d%m%Y_%H;%M;%S")
