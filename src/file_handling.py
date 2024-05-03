@@ -25,7 +25,7 @@ class FileHandling():
     # Path Functions (PUBLIC)
     # =========================================================================
     def __init__(self, inRelPath: str="in", outRelPath: str="out", debug: bool=False): 
-        global DIR_PARENT, DIR_INPUT, DIR_OUTPUT, CLASS_DEBUG
+        # global DIR_PARENT, DIR_INPUT, DIR_OUTPUT, CLASS_DEBUG
         
         DIR_PARENT = self._setDirParent()
         DIR_INPUT = self._setDirInput(inRelPath)

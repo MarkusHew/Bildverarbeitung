@@ -30,27 +30,36 @@ from src.file_handling import FileHandling
 import src.DatatoCSV as cs
 
 
-# Setze die Umgebungsvariable TESSDATA_PREFIX Betriebssystemabhängig
-# (Pfad wo die Tesseract-Sprachdateien abgelegt sind!)
-if os.name == "posix":  # Linux or MacOS
-    # Fuer Linux Ubuntu:
-    #os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata" # Pfad wo die Tesseract-Sprachdateien abgelegt sind!
-    os.environ["TESSDATA_PREFIX"] = "/home/riaanlinub/Desktop/Riaan_LinuxUbuntu/FHGR/3_FS24/Bildverarb1/PyVEnv_ImageProcessing/bin"
-    print("Fuer Linux gesetzter Pfad der Umgebungsvariable 'TESSDATA_PREFIX':", os.environ["TESSDATA_PREFIX"])
-elif os.name == "nt":  # Windows
-    os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #Pfad muss auf jeweiligen Rechner angepasst werden #hier sind die Sprachdateien
-    print("Fuer Windows gesetzter Pfad der Umgebungsvariable 'TESSDATA_PREFIX':", os.environ["TESSDATA_PREFIX"])
-else:
-    os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata"
-    print("Unknown operating system. Assuming Linux system.")
-    print("Gesetzter Pfad der Umgebungsvariable 'TESSDATA_PREFIX':", os.environ["TESSDATA_PREFIX"])
-
+fih=FileHandling("in","out")
+# =============================================================================
+# # Setze die Umgebungsvariable TESSDATA_PREFIX Betriebssystemabhängig
+# # (Pfad wo die Tesseract-Sprachdateien abgelegt sind!)
+# if os.name == "posix":  # Linux or MacOS
+#     # Fuer Linux Ubuntu:
+#     #os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata" # Pfad wo die Tesseract-Sprachdateien abgelegt sind!
+#     os.environ["TESSDATA_PREFIX"] = "/home/riaanlinub/Desktop/Riaan_LinuxUbuntu/FHGR/3_FS24/Bildverarb1/PyVEnv_ImageProcessing/bin"
+#     print("Fuer Linux gesetzter Pfad der Umgebungsvariable 'TESSDATA_PREFIX':", os.environ["TESSDATA_PREFIX"])
+# elif os.name == "nt":  # Windows
+#     os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #Pfad muss auf jeweiligen Rechner angepasst werden #hier sind die Sprachdateien
+#     print("Fuer Windows gesetzter Pfad der Umgebungsvariable 'TESSDATA_PREFIX':", os.environ["TESSDATA_PREFIX"])
+# else:
+#     os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata"
+#     print("Unknown operating system. Assuming Linux system.")
+#     print("Gesetzter Pfad der Umgebungsvariable 'TESSDATA_PREFIX':", os.environ["TESSDATA_PREFIX"])
+# =============================================================================
 
 verz= os.getcwd()
+def setup_Tesseract():
+    enviroment_paths = os.environ['Path'].split(';')
+    tesseract_path = None
+    for localpath in enviroment_paths: 
+        lowlocalpath = localpath.lower()
+        if (lowlocalpath.find('tesseract') != -1):
+            tesseract_path = fih.editDir(localpath, "tesseract.exe")
+            pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
 n=1
 
-fih=FileHandling("in","out");
 
 if(n==1): #Bild mit Webcam aufnehmen
     # Pfad in welchem das Bild gespeichert wird

@@ -157,15 +157,14 @@ def extract_total_price(ocr_strList):
 
 #Func to extract company identification number / Unternehmens-Identifikationsnummer (UID, eg. CHE-123.456.789) - Coop:
 def extract_UID(ocr_strList):
-        
     UID_pattern = r'\b\d{3}\.\d{3}\.\d{3}\b' # digit[0-9]=#: ###.###.###, 'CHE-' still needs to be put before this digit-pattern!
-	
-    # Find the index of 'BAR' in the list
-	# indexOfElementBAR = ocr_strList.index('DAR')
-	# print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
-	# # Define the range of indices you want to extract
-	# subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
-	# subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within global bounds
+    
+    #Find the index of 'BAR' in the list
+    indexOfElementBAR = ocr_strList.index('DAR')
+    print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
+	# Define the range of indices you want to extract
+    subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
+    subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within global bounds
     
 	# Get the sub-list of elements within the defined range
 	#UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
