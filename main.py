@@ -1,7 +1,9 @@
 """
 @data:      main.py
 @author:    Markus Hewel
-@versions:  ver 0.0.1 - 01.04.2024, 25.04.2024(minor changes for OS-dependant EnvVar-path-assignment, Riaan Kaempfer)
+@versions:  ver 0.0.0 - 01.04.2024 
+            ver 0.0.1 - 25.04.2024 (Riaan Kaempfer; Minor changes for OS-dependant EnvVar-path-assignment)
+            ver 0.0.2 - 03.05.2024 (Riaan Kaempfer; Error-catching, incase OCR doesn't recognise all relevant characters)
 @desc: 
     Bild aus Verzeichnis oder von Webcam oeffenen
     Bild in Graubild wandeln und mit opencv optimieren
