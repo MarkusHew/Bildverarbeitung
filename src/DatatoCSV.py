@@ -106,8 +106,17 @@ def extract_UID(ocr_strList):
 # 3 elements (that should be digits, maybe floats) to line-sublist_i
 def generate_line_sublists(ocr_strList):
     # Find the index of 'Total' and 'TOTAL' in the list
-    index_of_Total = ocr_strList.index('Total')
-    index_of_TOTAL = ocr_strList.index('TOTAL')
+    try:
+        index_of_Total = ocr_strList.index('Total')
+    except ValueError:
+        print("Error: 'Total' not found in the OCR string list.")
+        return None
+
+    try:
+        index_of_TOTAL = ocr_strList.index('TOTAL')
+    except ValueError:
+        print("Error: 'TOTAL' not found in the OCR string list.")
+        return None
     
     # Initialize a list to hold all line sublists
     line_sublists = []
@@ -173,38 +182,42 @@ def write_receipts_to_csv(file_path, combined_line_sublists, total_price_chf, Sh
         # Write the receipt items to the CSV file
         writer.writerow(['Items', 'Amount', 'Price [CHF]', 'Total Price [CHF]'])
         
-        # Iterate over combined_line_sublists
-        for sublist_of_CoLiSu in combined_line_sublists:
-            # Initialize variables
-            items = ''
-            amount = ''
-            price_chf = ''
-            found_amount = False
-            found_price = False
+        try:
+            # Iterate over combined_line_sublists
+            for sublist_of_CoLiSu in combined_line_sublists:
+                # Initialize variables
+                items = ''
+                amount = ''
+                price_chf = ''
+                found_amount = False
+                found_price = False
+                
+                # Iterate over elements in the sublist_of_CoLiSu
+                for i in range(len(sublist_of_CoLiSu)):
+                    # If the element contains digits, it's either 'Amount' or 'Price [CHF]'
+                    if re.search(r'\d', sublist_of_CoLiSu[i]):
+                        if not found_amount:
+                            amount = sublist_of_CoLiSu[i]
+                            found_amount = True
+                        elif not found_price:
+                            price_chf = sublist_of_CoLiSu[i]
+                            found_price = True
+                            # Since we only need the first amount and price_chf, we break after finding them
+                            break
+                     # If the element is a string, concatenate it to the 'items' string
+                    else:
+                        items += sublist_of_CoLiSu[i] + ' '
+                
+                # Write the extracted elements to the CSV file
+                writer.writerow([items.strip(), amount, price_chf, ''])
+            # Write an empty row for separation
+            writer.writerow([])
             
-            # Iterate over elements in the sublist_of_CoLiSu
-            for i in range(len(sublist_of_CoLiSu)):
-                # If the element contains digits, it's either 'Amount' or 'Price [CHF]'
-                if re.search(r'\d', sublist_of_CoLiSu[i]):
-                    if not found_amount:
-                        amount = sublist_of_CoLiSu[i]
-                        found_amount = True
-                    elif not found_price:
-                        price_chf = sublist_of_CoLiSu[i]
-                        found_price = True
-                        # Since we only need the first amount and price_chf, we break after finding them
-                        break
-                 # If the element is a string, concatenate it to the 'items' string
-                else:
-                    items += sublist_of_CoLiSu[i] + ' '
-            
-            # Write the extracted elements to the CSV file
-            writer.writerow([items.strip(), amount, price_chf, ''])
-# Write an empty row for separation
-        writer.writerow([])
-        
-        # Write the total price to the CSV file
-        writer.writerow(['', '', '', total_price_chf])
+            # Write the total price to the CSV file
+            writer.writerow(['', '', '', total_price_chf])
+        except TypeError as e:
+            print(f"Error in DatatoCSV.py: {e}, iteration over combined_line_sublists not possible, since combined_line_sublists couldn't be created, due to previous error(s)...")
+
       
 
 
