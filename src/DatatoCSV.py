@@ -18,9 +18,6 @@ import re
 # Import package for current date and time (Timecode):
 from datetime import datetime
 
-from tabulate import tabulate # Tabulate package is only installed in the virtual environment PyVEnvImageProcessing, 
-                            # so for this,  preferably execute this PyScript within the terminal with the appropriate VEnv activated!!
-
 
 
 # Function def to extract receipt date for a string-list as OCR-output within a specified range of list elements (start-/end_index): 
