@@ -23,80 +23,8 @@ from tabulate import tabulate # Tabulate package is only installed in the virtua
 
 
 
-# Function to convert ocr-text (as a single string) to a list of strings:
-# def string_to_word_list(input_string):
-    # # Split the input string into words
-    # word_list = input_string.split()
-    # return word_list
-
-# # Example usage
-# input_string = "Hello world! This is a sample string."
-# output_list = string_to_word_list(input_string)
-# print(output_list)
-
-# Function def to extract shop name for a single string as OCR-output:
-# def extract_shop_names(ocr_output):
-    # shopname_pattern = r'\b(Denner|Coop|Migros|Volg)\b'
-    # matches = re.findall(shopname_pattern, ocr_output)
-    # if len(matches) > 1:
-        # print("Warning: Multiple shop names found!")
-    # return matches
-    
-# # Function def to extract shop name for a string-list as OCR-output:    
-# def extract_shop_names(ocr_output):
-    # shopname_pattern = r'\b(Denner|Coop|Migros|Volg)\b'
-    # matches = []
-    # for line in ocr_output:
-        # matches.extend(re.findall(shopname_pattern, line))
-    # if len(matches) > 1:
-        # print("Warning: Multiple shop names found!")
-    # return matches
-    
-    # # Function def to extract shop name for a string-list as OCR-output within a specified range of list elements (start-/end_index):    
-# def extract_shop_name_frStrList(ocr_strList):
-    # shopname_pattern = r'\b(Denner|Coop|Migros|Volg)\b'
-    # matches = []
-    # for line in ocr_strList:
-        # matches.extend(re.findall(shopname_pattern, line))
-    # if len(matches) > 1:
-        # print("Warning: Multiple shop names found!")
-    # return matches
-
-    
 # Function def to extract receipt date for a string-list as OCR-output within a specified range of list elements (start-/end_index): 
-# def extract_receipt_date(ocr_strList):
-    # StartDateIndex_Coop=70
-    # EndDateIndex_Coop=75
-    # date_pattern = r'\b(?:\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{4})\b'
-    # start_index = StartDateIndex_Coop
-    # end_index = EndDateIndex_Coop
-    # for i in range(start_index, end_index + 1):
-        # dates_found = re.findall(date_pattern, ocr_strList[i])
-        # if dates_found:
-            # return dates_found[0]  # Return the first date found
-    # return None  # Return None if no date is found
-
-
-
-
-# def extract_receipt_date(ocr_strList):
-    # date_pattern = r'\b(?:\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{4})\b'  # Date pattern (DD.MM.YY or DD.MM.YYYY)
-    # #!!! maybe also to replace by a range instead of a single index num, for reliability!!:
-    # #index_to_check_Coop = -6  # Index of the 6th-last element in the list 
-    
-    # # Check the 6th-last element for the date pattern match
-    # for i in range(len(ocr_strList)):
-        # #print(ocr_strList[i])
-        # dates_found = re.findall(date_pattern, ocr_strList[i])
-        # #print("Test",dates_found)
-        # if dates_found:        
-            # # Return the date found
-            # return dates_found[0]  # Assuming only one date is expected in the element
-    
-    # #Return None if no date is found
-    # return None    
-
-# Or rather this version, since safer - should work for any Coop receipt (no matter how long it is)!:
+# Should work for any Coop receipt (no matter how long it is).
 def extract_receipt_date(ocr_strList):
     date_pattern = r'\b(?:\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\.\d{4})\b'  # Date pattern (DD.MM.YY or DD.MM.YYYY)
     # Check within an index-range instead of a single index num, for reliability!!:
@@ -146,14 +74,6 @@ def extract_total_price(ocr_strList):
             break  # Stop searching once 'TOTAL' and the appropriate price-digit is found.
     return None  # Return None if 'TOTAL' or the price is not found.
 
-
-# def extract_total_price(ocr_strList):
-    # TotalPriceCoop_pattern = r'\b(TOTAL)\b'
-    # matches = []
-    # for line in ocr_strList:
-        # matches.extend(re.findall(TotalPriceCoop_pattern, line))
-    # return matches
-    # total_price = 
 
 #Func to extract company identification number / Unternehmens-Identifikationsnummer (UID, eg. CHE-123.456.789) - Coop:
 def extract_UID(ocr_strList):
