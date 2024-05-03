@@ -75,7 +75,7 @@ def extract_UID(ocr_strList):
     UID_pattern = r'\b\d{3}\.\d{3}\.\d{3}\b' # digit[0-9]=#: ###.###.###, 'CHE-' still needs to be put before this digit-pattern!
     
     # Find the index of 'BAR' in the list
-    indexOfElementBAR = ocr_strList.index('DAR')
+    indexOfElementBAR = ocr_strList.index('BAR')
     print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
     # Define the range of indices you want to extract
     subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
