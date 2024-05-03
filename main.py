@@ -223,10 +223,12 @@ date_string = now.strftime("%d%m%Y_%H;%M;%S")
 # Generate combined line sublists
 combined_line_sublists = cs.generate_line_sublists(text)
 
-# Print the combined line sublists
-for i, combined_line_sublist in enumerate(combined_line_sublists, start=1):
-    print(f"combined_line_sublist_{i}: {combined_line_sublist}")
-
+if combined_line_sublists is not None:
+    # Print the combined line sublists
+    for i, combined_line_sublist in enumerate(combined_line_sublists, start=1):
+        print(f"combined_line_sublist_{i}: {combined_line_sublist}")
+else:
+    print(f"Error: Unable to generate combined line sublists in main.py, 'combined_line_sublists'. 'NoneType' object is not iterable, i.e. \n probably the product-detail-list could not be generated previously, \n probably due to OCR-issue with the provided receipt-pic...")
 
 
 # Call primitive CSV-file-writing funct.:
