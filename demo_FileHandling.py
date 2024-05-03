@@ -14,6 +14,9 @@ relativeOutputPath = "out"
 fih = FileHandling(relativeInputPath, relativeOutputPath, True) # True is for Debug
 AbsPathParent = fih.getDirParent()
 
+test = ["config", "tessdata"]
+# test_path = fih.editDir(AbsPathParent, test)
+
 res = FileHandling().openAllFiles()
 i = 0
 for img in res:
