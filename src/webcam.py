@@ -7,7 +7,7 @@ import os
 
 
 def Bild_aufnehmen(save_path=None):    # change here, to open your preferred webcam
-    DEVICE_ID=0 
+    DEVICE_ID=1 
     
     if platform.system() == 'Windows':
         videoBackend = cv2.CAP_DSHOW
@@ -20,7 +20,7 @@ def Bild_aufnehmen(save_path=None):    # change here, to open your preferred web
     
     # Überprüfe und drucke die maximale Auflösung der Kamera default 640x480
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 3000)#1280
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)#480
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)#480
     max_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     max_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
     print(f"Maximale Auflösung der Kamera: {max_width} x {max_height}")

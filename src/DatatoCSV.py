@@ -157,37 +157,39 @@ def extract_total_price(ocr_strList):
 
 #Func to extract company identification number / Unternehmens-Identifikationsnummer (UID, eg. CHE-123.456.789) - Coop:
 def extract_UID(ocr_strList):
-	UID_pattern = r'\b\d{3}\.\d{3}\.\d{3}\b' # digit[0-9]=#: ###.###.###, 'CHE-' still needs to be put before this digit-pattern!
+        
+    UID_pattern = r'\b\d{3}\.\d{3}\.\d{3}\b' # digit[0-9]=#: ###.###.###, 'CHE-' still needs to be put before this digit-pattern!
 	
-	# Find the index of 'BAR' in the list
-	indexOfElementBAR = ocr_strList.index('DAR')
-	print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
-	# Define the range of indices you want to extract
-	subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
-	subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within global bounds
-
+    # Find the index of 'BAR' in the list
+	# indexOfElementBAR = ocr_strList.index('DAR')
+	# print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
+	# # Define the range of indices you want to extract
+	# subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
+	# subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within global bounds
+    
 	# Get the sub-list of elements within the defined range
-	UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
+	#UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
+    UID_sublist = ocr_strList
 	
 	# Convert the sub-list to a single string
-	UID_sublist2String = ' '.join(UID_sublist)
-
-	# Check within the sub_list for UID-pattern match
-	UIDs_found = re.findall(UID_pattern, UID_sublist2String)
+    UID_sublist2String = ' '.join(UID_sublist)
     
-	if UIDs_found:
-		# Prepend 'CHE-' to the UID found and return it all together
-		return f'CHE-{UIDs_found[0]}'  # Assuming only one UID is expected in the element
+	# Check within the sub_list for UID-pattern match
+    UIDs_found = re.findall(UID_pattern, UID_sublist2String)
+    
+    if UIDs_found:
+        # Prepend 'CHE-' to the UID found and return it all together
+        return f'CHE-{UIDs_found[0]}'  # Assuming only one UID is expected in the element
 	
 	# Return None if no UID is found
-	return None
-
+    return None
 
 # group string-list elements in range [dict_StartIndex:dict_EndIndex] to line-sublists
 # Until 'TOTAL' is not reached, from and excl. 'Total' onwards, search for first next digit (integer), 
 # append that with previous line-sublist-elements until and excl. 'Total' or until and 
 # excl. previous digit-element (as 1st line-sublist-element) and append next 
 # 3 elements (that should be digits, maybe floats) to line-sublist_i
+
 def generate_line_sublists(ocr_strList):
     # Find the index of 'Total' and 'TOTAL' in the list
     index_of_Total = ocr_strList.index('Total')
@@ -197,7 +199,7 @@ def generate_line_sublists(ocr_strList):
     line_sublists = []
     
     # Iterate over the indices between 'Total' and 'TOTAL'
-    start_index = index_of_Total + 1
+    start_index = index_of_Total + 1    
     end_index = index_of_TOTAL - 1
     i = start_index
     
@@ -496,10 +498,11 @@ def generate_dictionary(ocr_strList):
             
 def write_receipts_to_csv(file_path, combined_line_sublists, total_price_chf, ShopName, ShopAddress, uid, ReceiptDate):
     # Open CSV file in write mode
-    with open(file_path, mode='w', newline='') as csvfile:
+    #with open(file_path, mode='w', newline='') as csvfile:
+    with open(file_path, mode='w', encoding='utf-8') as csvfile:
         # Create a CSV writer object
         try:
-            writer = csv.writer(csvfile)
+            writer = csv.writer(csvfile, delimiter=";")
             print("csv file erstellt in Verzeichnis: ", file_path)
         except Exception as e:
             print(f"Fehler beim erstellen des csv files: {e}")

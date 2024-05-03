@@ -48,55 +48,25 @@ else:
 
 verz= os.getcwd()
 
-n=2
+n=1
 
 fih=FileHandling("in","out");
-# current_directory = os.getcwd() #aktuelles Verzeichnis holen
-# #print("Aktuelles Verzeichnis:", current_directory)
-# save_path=current_directory+"\in"   #Speicherverzeichnis für Webcambild
-# print(save_path)
-
 
 if(n==1): #Bild mit Webcam aufnehmen
     # Pfad in welchem das Bild gespeichert wird
-    #img=Bild_aufnehmen(save_path)
-    pass
+    img=Bild_aufnehmen(fih.getDirInput())
 
 if(n==2): #Bild aus Verzeichnis lesen
     try:
         # Öffne das Bild mit opencv        
         result=fih.openSearchedFiles("CoopReceipt_scan_2024-04-12_11-24-29.png")#CoopReceipt_scan_2024-04-12_11-24-29.jpg        
-        #Rechnung_Volg.jpg
         img,pfad = result[0];
-        #pfad=current_directory+"/in/CoopRechnung2.jpg"
-
     except Exception as e:
         print(f"Fehler beim Öffnen des Bildes: {e}")
 
 ###############################################
 
-# # Bild im TIFF-Format speichern
-# cv2.imwrite('img.tif', img)        
-# #Vorbereitung für tesseract        
-# # Foto in Grauskala wandeln, damit Tesseract besser erkennen kann (Kontrast)
-# img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
 
-# # Bild abspeichern
-# file_path = os.path.join(save_path, "gray_image.tif")
-# cv2.imwrite(file_path, img)
-# cv2.imshow('Graubild',img)
-
-# # weitere "Vereinfachungen" für Tesseract
-# blur=cv2.GaussianBlur(img,(7,7),0)
-# threshold_image = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-# file_path = os.path.join(save_path, "blur_image.tif")
-# cv2.imwrite(file_path, threshold_image)
-
-# ################################################
-
-
-#Programm Jannis
-#fih = FileHandling("in", "out")
 grs = GraphicsService()
 #result = fih.openAllFiles() # function returns img and it's path
 # print(len(result))
@@ -104,7 +74,7 @@ grs = GraphicsService()
 #img=cv2.rotate(img,cv2.ROTATE_90_CLOCKWISE)
 #rotate,_=grs.deskew(img) 
 binary = grs.cvToBlackWhite(img, 1)
-binary=grs.cvToGrayScale(img)
+#binary=grs.cvToGrayScale(img)
 #borders= grs.cvRemoveBorders(rotate)
 print(binary.shape)
 cv2.imwrite("binary.tif", binary)
@@ -133,7 +103,10 @@ rescaled = grs.cvApplyRescaling(img, 0.3)
 # # print(shop_name)
 # #######################################
 # #Methode die mit Textboxen arbeitet
+cv2.imshow("Bild pytasseract",binary)
+cv2.waitKey(0)
 img_boxes,text,tab=tx.textbox(binary,4)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
+
 print("erkannter Text: ",text)
 #print(tab.to_string())
 
