@@ -230,6 +230,8 @@ def write_receipts_to_csv(file_path, combined_line_sublists, total_price_chf, Sh
 # =============================================================================
 from tabulate import tabulate # Tabulate package is only installed in the virtual environment PyVEnvImageProcessing, 
                             # so for this,  preferably execute this PyScript within the terminal with the appropriate VEnv activated!!
+import os
+
 # Function to convert ocr-text (as a single string) to a list of strings:
 def string_to_word_list(input_string):
     # # Split the input string into words
@@ -461,6 +463,12 @@ def main():
     #file_name = f"{receipt_date}_{shop_name}_ReceiptData{date_string}.csv"
     #write_receipt_to_csv(file_name, Receipt)
     #write_receipts_to_csv(file_name, Receipt, shop_name, shopAddress, shop_UID, receipt_date)
+    
+    # Construct the file path for the CSV-file and call CSV-file-writing funct.:
+    file_name = f"{receipt_date}_{shop_name}_TESTINGReceiptData{date_string}.csv"
+    folder_name = '../out'
+    file_path = os.path.join(folder_name, file_name)
+    print("Verzeichnis: ", file_path)
     write_receipts_to_csv(file_path, combined_line_sublists, total_price, shop_name, shopAddress, shop_UID, receipt_date)
 
 
