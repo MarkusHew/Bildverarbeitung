@@ -74,13 +74,21 @@ def extract_total_price(ocr_strList):
 def extract_UID(ocr_strList):
     UID_pattern = r'\b\d{3}\.\d{3}\.\d{3}\b' # digit[0-9]=#: ###.###.###, 'CHE-' still needs to be put before this digit-pattern!
     
-    # Find the index of 'BAR' in the list
-    indexOfElementBAR = ocr_strList.index('BAR')
-    print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
-    # Define the range of indices you want to extract
-    subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
-    subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within global bounds
-
+    try:
+        # Find the index of 'BAR' in the list
+        indexOfElementBAR = ocr_strList.index('BAR')
+        print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
+        
+        
+        # Define the range of indices you want to extract
+        subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
+        subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within global bounds
+        
+    except ValueError as e:
+        print(f"Error while calling extract_UID(text): {e}, UID-pattern is searched over the entire OCR-output-string-list in order to find shop-UID anyway. ;-)")
+        subList_StartIndex = 0
+        subList_EndIndex = len(ocr_strList)
+    
     # Get the sub-list of elements within the defined range
     UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
     
