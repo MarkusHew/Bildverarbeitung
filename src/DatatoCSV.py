@@ -215,8 +215,12 @@ def write_receipts_to_csv(file_path, combined_line_sublists, total_price_chf, Sh
             
             # Write the total price to the CSV file
             writer.writerow(['', '', '', total_price_chf])
-        except TypeError as e:
+        
+	except TypeError as e:
             print(f"Error in DatatoCSV.py: {e}, iteration over combined_line_sublists not possible, since combined_line_sublists couldn't be created, due to previous error(s)...")
+        
+	# Write the total price to the CSV file
+        writer.writerow(['', '', '', total_price_chf])
 
       
 
