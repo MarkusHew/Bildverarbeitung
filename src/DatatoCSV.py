@@ -147,7 +147,7 @@ def generate_line_sublists(ocr_strList):
 
 
 
-           
+# Write extracted receipt data to a new CSV-file:           
 def write_receipts_to_csv(file_path, combined_line_sublists, total_price_chf, ShopName, ShopAddress, uid, ReceiptDate):
     # Open CSV file in write mode
     with open(file_path, mode='w', newline='') as csvfile:
