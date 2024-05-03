@@ -47,12 +47,12 @@ def extract_receipt_date(ocr_strList):
     return None
 
 
-#Func to extract shop adress etc.
+#Func to extract shop address:
 def extract_shop_address(ocr_strList):
     shop_address = " ".join(ocr_strList[8:11]) # Extract the address elements from ocr_strList-indices 5 and 6
     return shop_address
 
-#Func to extract total price
+#Func to extract total price:
 def extract_total_price(ocr_strList):
     # Iterate through the string-list to find the index of 'TOTAL'
     for i in range(len(ocr_strList)):
@@ -98,7 +98,7 @@ def extract_UID(ocr_strList):
     return None
 
 
-# Generate combined line sublists:
+# Generate combined line sublists (a list of lists containing each product's details (item, amount, price)):
 # Group string-list elements in range [dict_StartIndex:dict_EndIndex] to line-sublists
 # Until 'TOTAL' is not reached, from and excl. 'Total' onwards, search for first next digit (integer), 
 # append that with previous line-sublist-elements until and excl. 'Total' or until and 
