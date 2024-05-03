@@ -50,8 +50,6 @@ def extract_receipt_date(ocr_strList):
     return None
 
 
-
-
 #Func to extract shop adress etc.
 def extract_shop_address(ocr_strList):
     shop_address = " ".join(ocr_strList[8:11]) # Extract the address elements from ocr_strList-indices 5 and 6
@@ -103,7 +101,8 @@ def extract_UID(ocr_strList):
     return None
 
 
-# group string-list elements in range [dict_StartIndex:dict_EndIndex] to line-sublists
+# Generate combined line sublists:
+# Group string-list elements in range [dict_StartIndex:dict_EndIndex] to line-sublists
 # Until 'TOTAL' is not reached, from and excl. 'Total' onwards, search for first next digit (integer), 
 # append that with previous line-sublist-elements until and excl. 'Total' or until and 
 # excl. previous digit-element (as 1st line-sublist-element) and append next 
@@ -145,275 +144,13 @@ def generate_line_sublists(ocr_strList):
     
     return combined_line_sublists
 
-# # Generate combined line sublists
-# combined_line_sublists = generate_line_sublists(ocr_strList)
-
-# # Print the combined line sublists
-# for i, combined_line_sublist in enumerate(combined_line_sublists, start=1):
-    # print(f"combined_line_sublist_{i}: {combined_line_sublist}")
-
-
-
-# def generate_line_sublists(ocr_strList):
-    # # Find the index of 'Total' and 'TOTAL' in the list
-    # index_of_Total = ocr_strList.index('Total')
-    # index_of_TOTAL = ocr_strList.index('TOTAL')
-    
-    # # Initialize a list to hold all line sublists
-    # line_sublists = []
-    
-    # # Iterate over the indices between 'Total' and 'TOTAL'
-    # start_index = index_of_Total + 1
-    # end_index = index_of_TOTAL - 1
-    # i = start_index
-    
-    # while i <= end_index:
-        # # Initialize a sublist for the current line
-        # line_sublist = []
-        
-        # # Collect elements until encountering a non-numeric string or reaching the end of the range
-        # while i <= end_index and not ocr_strList[i].isdigit() and ocr_strList[i] != 'TOTAL':
-            # line_sublist.append(ocr_strList[i])
-            # i += 1
-        
-        # # Add elements until encountering the next non-numeric string or reaching the end of the range
-        # while i <= end_index and (ocr_strList[i].isdigit() or ocr_strList[i] == '.' or ocr_strList[i] == '0'):
-            # line_sublist.append(ocr_strList[i])
-            # i += 1
-        
-        # # Add the collected line sublist to the list of line sublists
-        # line_sublists.append(line_sublist)
-    
-    # return line_sublists
-
-
-# def generate_line_sublists(ocr_strList):
-    # # Find the index of 'Total' and 'TOTAL' in the list
-    # index_of_Total = ocr_strList.index('Total')
-    # index_of_TOTAL = ocr_strList.index('TOTAL')
-    
-    # # Initialize a list to hold all line sublists
-    # line_sublists = []
-    
-    # # Iterate over the indices between 'Total' and 'TOTAL'
-    # start_index = index_of_Total + 1
-    # end_index = index_of_TOTAL - 1
-    # i = start_index
-    
-    # while i <= end_index:
-        # # Initialize a sublist for the current line
-        # line_sublist = []
-        
-        # # Collect the first non-numeric string (excluding 'TOTAL') as the start of the line sublist
-        # while i <= end_index and (ocr_strList[i].isdigit() or ocr_strList[i] == 'TOTAL'):
-            # i += 1
-        
-        # # Add the first non-numeric string to the current line sublist
-        # if i <= end_index:
-            # line_sublist.append(ocr_strList[i])
-            # i += 1
-        
-        # # Collect subsequent numeric values until encountering a non-numeric string (excluding 'TOTAL')
-        # while i <= end_index and (ocr_strList[i].isdigit() or ocr_strList[i] == '.'):
-            # line_sublist.append(ocr_strList[i])
-            # i += 1
-        
-        # # Add the collected line sublist to the list of line sublists
-        # line_sublists.append(line_sublist)
-    
-    # return line_sublists
-
-
-# def generate_line_sublists(ocr_strList):
-    # # Find the index of 'Total' and 'TOTAL' in the list
-    # index_of_Total = ocr_strList.index('Total')
-    # index_of_TOTAL = ocr_strList.index('TOTAL')
-    
-    # # Initialize a list to hold all line sublists
-    # line_sublists = []
-    
-    # # Iterate over the indices between 'Total' and 'TOTAL'
-    # start_index = index_of_Total + 1
-    # end_index = index_of_TOTAL - 1
-    # i = start_index
-    
-    # while i <= end_index:
-        # # Initialize a sublist for the current line
-        # line_sublist = []
-        
-        # # Collect elements for the current line until encountering a numeric value or any string except 'TOTAL'
-        # while i <= end_index and (ocr_strList[i].isdigit() or (ocr_strList[i] != 'TOTAL' and not ocr_strList[i].isalpha())):
-            # line_sublist.append(ocr_strList[i])
-            # i += 1
-        
-        # # Add the collected line sublist to the list of line sublists
-        # line_sublists.append(line_sublist)
-        
-        # # Move to the next element
-        # i += 1
-    
-    # return line_sublists
-
-# # Generate line sublists
-# line_sublists = generate_line_sublists(ocr_strList)
-
-# # Print the line sublists
-# for i, line_sublist in enumerate(line_sublists, start=1):
-    # print(f"line_sublist_{i}: {line_sublist}")
-
-
-
-
-
-# def generate_line_sublists(ocr_strList):
-    # # Find the indices of 'Total' and 'TOTAL'
-    # start_index = ocr_strList.index('Total')
-    # end_index = ocr_strList.index('TOTAL')
-    
-    # # Extract the relevant part of the list
-    # relevant_part = ocr_strList[start_index + 1:end_index]
-    
-    # line_sublists = []
-    # current_sublist = []
-
-    # for item in relevant_part:
-        # current_sublist.append(item)
-        
-        # # Check if the item is a digit (integer or float)
-        # if re.match(r'^-?\d+(\.\d+)?$', item):  # Regular expression to match integer or float numbers
-            # line_sublists.append(current_sublist)
-            # current_sublist = []  # Reset the current sublist
-    
-    # # Append the last incomplete sublist if any
-    # if current_sublist:
-        # line_sublists.append(current_sublist)
-    
-    # return line_sublists
-
-    # # # line_sublists = []
-    # # # start_index = ocr_strList.index('Total') + 1
-    # # # end_index = ocr_strList.index('TOTAL') - 1
-
-    # # # i = start_index
-    # # # while i <= end_index:
-        # # # line_sublist = []
-        # # # while i <= end_index and not ocr_strList[i].isdigit():
-            # # # line_sublist.append(ocr_strList[i])
-            # # # i += 1
-        # # # line_sublists.append(line_sublist)
-        # # # i += 1
-
-    # # # return line_sublists
-
-
-# # Call the function to generate line_sublists
-# line_sublists = generate_line_sublists(ocr_strList)
-
-# # Print the generated line_sublists
-# for i, sublist in enumerate(line_sublists, 1):
-    # print(f"line_sublist_{i}: {sublist}")
-
-
-
-# Generate dictionary for shop item details:
-def generate_dictionary(ocr_strList):
-    # Find the indices of 'Total' and 'TOTAL' in the list
-    dict_StartIndex = ocr_strList.index('Total')
-    dict_EndIndex = ocr_strList.index('TOTAL')
-
-    # Extract relevant elements for the dictionary
-    items = ocr_strList[dict_StartIndex + 1:dict_EndIndex]  # Elements between 'Total' and 'TOTAL'
-    amount = items[0]  # Assuming the first element after 'Total' is the amount
-    price_chf = items[1]  # Assuming the second element after 'Total' is the price in CHF
-    total_price_chf = items[2]  # Assuming the third element after 'Total' is the total price in CHF
-
-    # Create the dictionary
-    receipt_dict = {
-        'items': ' '.join(items),
-        'amount': amount,
-        'price [CHF]': price_chf,
-        'total price [CHF]': total_price_chf
-    }
-
-    # Print the resulting dictionary
-    print(receipt_dict)
-
 
 
 #Func for indices according to the different shop's receipt-patterns / -extraction-methods:
 
 
 
-
-
-# def write_receipt_to_csv(file_name, receipt):
-    # with open(file_name, mode='w', newline='') as csvfile:
-        # datacolumns = receipt[0].keys()
-        # writer = csv.DictWriter(csvfile, fieldnames=datacolumns)
-        # writer.writeheader()
-        # for row in receipt:
-            # writer.writerow(row)
-            
-######### ###### ######
-# def write_receipts_to_csv(file_name, receipt, ShopName, ShopAddress, uid, ReceiptDate):
-    # # Open CSV file in write mode
-    # with open(file_name, mode='w', newline='') as csvfile:
-        # # Create a CSV writer object
-        # writer = csv.writer(csvfile)
-        
-        # # Write the shop name to the CSV file
-        # writer.writerow(['Shop Name:', ShopName])
-        # # Write the shop address to the CSV file
-        # writer.writerow(['Shop Address:', ShopAddress])
-        # # Write the shop's UID to the CSV file
-        # writer.writerow(['Shop UID:', uid])
-         # # Write the receipt date to the CSV file
-        # writer.writerow(['Receipt date:', ReceiptDate])
-        
-        # # Write an empty row for separation
-        # writer.writerow([])
-        
-        # # Write the receipt items to the CSV file
-        # writer.writerow(['Items', 'Amount', 'Price [CHF]', 'Total Price [CHF]'])
-        # for col_element in receipt:
-            # writer.writerow([col_element['items'], col_element['amount'], col_element['price [CHF]'], col_element['total price [CHF]']])
-
-
-
-
-
-# def write_receipts_to_csv(file_name, combined_line_sublists, ShopName, ShopAddress, uid, ReceiptDate):
-    # # Open CSV file in write mode
-    # with open(file_name, mode='w', newline='') as csvfile:
-        # # Create a CSV writer object
-        # writer = csv.writer(csvfile)
-        
-        # # Write the shop name to the CSV file
-        # writer.writerow(['Shop Name:', ShopName])
-        # # Write the shop address to the CSV file
-        # writer.writerow(['Shop Address:', ShopAddress])
-        # # Write the shop's UID to the CSV file
-        # writer.writerow(['Shop UID:', uid])
-         # # Write the receipt date to the CSV file
-        # writer.writerow(['Receipt date:', ReceiptDate])
-        
-        # # Write an empty row for separation
-        # writer.writerow([])
-        
-        # # Write the receipt items to the CSV file
-        # writer.writerow(['Items', 'Amount', 'Price [CHF]', 'Total Price [CHF]'])
-        
-        # # Iterate over combined_line_sublists
-        # for sublist in combined_line_sublists:
-            # # Extract relevant elements for each sublist
-            # items = sublist[0]
-            # amount = sublist[1]
-            # price_chf = sublist[2]
-            # total_price_chf = sublist[3]
-            
-            # # Write the extracted elements to the CSV file
-            # writer.writerow([items, amount, price_chf, total_price_chf])
-            
+           
 def write_receipts_to_csv(file_path, combined_line_sublists, total_price_chf, ShopName, ShopAddress, uid, ReceiptDate):
     # Open CSV file in write mode
     with open(file_path, mode='w', newline='') as csvfile:
@@ -473,9 +210,49 @@ def write_receipts_to_csv(file_path, combined_line_sublists, total_price_chf, Sh
         writer.writerow(['', '', '', total_price_chf])
       
 
+
 # =============================================================================
 # TESTING
 # =============================================================================
+from tabulate import tabulate # Tabulate package is only installed in the virtual environment PyVEnvImageProcessing, 
+                            # so for this,  preferably execute this PyScript within the terminal with the appropriate VEnv activated!!
+# Function to convert ocr-text (as a single string) to a list of strings:
+def string_to_word_list(input_string):
+    # # Split the input string into words
+    word_list = input_string.split()
+    return word_list
+  
+# # Example usage
+# input_string = "Hello world! This is a sample string."
+# output_list = string_to_word_list(input_string)
+# print(output_list)
+
+
+# Not needed for writing csv-file actually, just for table in Py-prompt!:
+# Generate dictionary for shop item details:
+def generate_dictionary(ocr_strList):
+	# Find the indices of 'Total' and 'TOTAL' in the list
+	dict_StartIndex = ocr_strList.index('Total')
+	dict_EndIndex = ocr_strList.index('TOTAL')
+
+	# Extract relevant elements for the dictionary
+	items = ocr_strList[dict_StartIndex + 1:dict_EndIndex]  # Elements between 'Total' and 'TOTAL'
+	amount = items[0]  # Assuming the first element after 'Total' is the amount
+	price_chf = items[1]  # Assuming the second element after 'Total' is the price in CHF
+	total_price_chf = items[2]  # Assuming the third element after 'Total' is the total price in CHF
+
+	# Create the dictionary
+	receipt_dict = {
+		'items': ' '.join(items),
+		'amount': amount,
+		'price [CHF]': price_chf,
+		'total price [CHF]': total_price_chf
+	}
+
+	# Print the resulting dictionary
+	print(receipt_dict)
+  
+
 def main():
 
     # For Tesseract Usage on Linux Ubuntu within command line terminal:
