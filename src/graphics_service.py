@@ -16,15 +16,36 @@ import matplotlib.pyplot as plt
 
 # This service contains all OpenCV and display functions that can be reused
 class GraphicsService():
-    def displayImage(self, path:str):
-        if type(path) is not str:
+    def __init__(self):
+        # self.counterPreprocessing = 0
+        # self.shouldConf = 0.80
+        # self.oldConf = 0.
+        return None
+    
+    def runPreprocessingTessract(self, cvImage, counter):
+        counter = self.counterPreprocessing
+        img = cv2.copy(cvImage)
+        
+        if(counter == 0):
+            img = self.deskew(img)[0]
+            img = self.cvRemoveBorders(img)
+            img = self.cvToGrayScale(img)
+        if(counter == 1):
+            img = self.cvToBlackWhite(img, 1)
+            
+        if(counter > 1):
+            print("what now??")
+        # self.counterPreprocessing+=1
+        return img
+    def displayImage(self, pathORimg):
+        if type(pathORimg) is not str:
             try: 
-                cv2.imshow("img", path)
+                cv2.imshow("img", pathORimg)
             except:
                 print("not image or path")
         else: 
             dpi = 80
-            im_data = plt.imread(path)
+            im_data = plt.imread(pathORimg)
             height, width = im_data.shape[:2]
             
             # What size does the figure need to be in inches to fit the image?
@@ -74,7 +95,7 @@ class GraphicsService():
         kernel = np.ones((1, 1), np.uint8)
         cvImage = cv2.erode(cvImage, kernel, iterations=1)
         
-        #reduces Noise
+        # reduces Noise
         cvImage = cv2.morphologyEx(cvImage, cv2.MORPH_CLOSE, kernel)
         cvImage = cv2.medianBlur(cvImage, 3) 
         
@@ -115,7 +136,7 @@ class GraphicsService():
         largestContour = contours[0]
         x, y, w, h = cv2.boundingRect(largestContour)
         
-        print(cv2.boundingRect(largestContour))
+        # print(cv2.boundingRect(largestContour))
         # crop = cvImage
         crop = cvImage[y:y+h, x:x+w]
         return crop
@@ -157,7 +178,7 @@ class GraphicsService():
     # Deskew image
     def deskew(self, cvImage) -> Tuple:
         skewangle = self.getSkewAngle(cvImage, True)
-        print(skewangle)
+        # print(skewangle)
         # return self.rotateImage(cvImage, -1.0 * angle), skewangle
         return self.rotateImage(cvImage, -1.0 * skewangle)
     
@@ -180,9 +201,8 @@ class GraphicsService():
         # Apply dilate to merge text into meaningful lines/paragraphs.
         # Use larger kernel on X axis to merge characters into single line, cancelling out any spaces.
         # But use smaller kernel on Y axis to separate between different blocks of text
-        factor = 1
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30*factor, 5)) # TODO: what does this influence?
-        dilate = cv2.dilate(thresh, kernel, iterations=1)          # TODO: what does this interations influence? higher Number worse results?
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 5))  
+        dilate = cv2.dilate(thresh, kernel, iterations=3)
         if debug:
             cv2.imshow('Dilate', dilate)
 
@@ -202,9 +222,26 @@ class GraphicsService():
             minAreaRectContour = np.int0(cv2.boxPoints(minAreaRect))
             temp2 = cv2.drawContours(newImage.copy(), [minAreaRectContour], -1, (255, 0, 0), 2)
             cv2.imshow('Largest Contour', temp2)
-            
+        
+        
+        # print()
+        # print()
+        # print(minAreaRect)
+        # print(minAreaRect[1])
+        # print(cv2.boxPoints(minAreaRect))
+        # print()
+        # print()
+        # mAR_width, mAR_height= minAreaRect[1]
+        # mAR_angle = minAreaRect[-1]
+        # if(mAR_width < mAR_height):
+        #     print("Angle along longer side:", mAR_angle);
+        # else:
+        #     print("Angle along longer side:", mAR_angle);
+        
+        
         # Determine the angle. Convert it to the value that was originally used to obtain skewed image
-        angle = minAreaRect[-1]
+        angle = minAreaRect[-1]+90
+    
         if angle < -45:
             angle = 90 + angle
             return -1.0 * angle

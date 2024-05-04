@@ -22,13 +22,16 @@ def main() :
     result = fih.openAllFiles() # function returns img and it's path
     print(len(result))
     img, imgpath = result[0]
-    img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+    # img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
     # print(img)
     # rescaled = grs.cvApplyRescaling(img, 0.5)
     # img = grs.cvToBlackWhite(img, 2)
-    # img = grs.deskew(img)
-    crop = grs.cvRemoveBorders(img)
-    grs.displayImage(crop)
+    # crop = grs.cvRemoveBorders(img)
+    img = grs.rotateImage(img, 25)
+    crop  = img
+    deskew = grs.deskew(crop)
+    
+    grs.displayImage(deskew)
     # img = grs.cvApplyThickerFont(img, 2)
 # =============================================================================
 #     img = grs.cvRemoveBorders(img)
