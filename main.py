@@ -1,7 +1,9 @@
 """
 @data:      main.py
 @author:    Markus Hewel
-@versions:  ver 0.0.1 - 01.04.2024, 25.04.2024(minor changes for OS-dependant EnvVar-path-assignment, Riaan Kaempfer)
+@versions:  ver 0.0.0 - 01.04.2024 
+            ver 0.0.1 - 25.04.2024 (Riaan Kaempfer; Minor changes for OS-dependant EnvVar-path-assignment)
+            ver 0.0.2 - 03.05.2024 (Riaan Kaempfer; Error-catching, incase OCR doesn't recognise all relevant characters)
 @desc: 
     Bild aus Verzeichnis oder von Webcam oeffenen
     Bild in Graubild wandeln und mit opencv optimieren
@@ -166,10 +168,12 @@ date_string = now.strftime("%d%m%Y_%H;%M;%S")
 # Generate combined line sublists
 combined_line_sublists = cs.generate_line_sublists(text)
 
-# Print the combined line sublists
-for i, combined_line_sublist in enumerate(combined_line_sublists, start=1):
-    print(f"combined_line_sublist_{i}: {combined_line_sublist}")
-
+if combined_line_sublists is not None:
+    # Print the combined line sublists
+    for i, combined_line_sublist in enumerate(combined_line_sublists, start=1):
+        print(f"combined_line_sublist_{i}: {combined_line_sublist}")
+else:
+    print(f"Error: Unable to generate combined line sublists in main.py, 'combined_line_sublists'. 'NoneType' object is not iterable, i.e. \n probably the product-detail-list could not be generated previously, \n probably due to OCR-issue with the provided receipt-pic...")
 
 
 # Call primitive CSV-file-writing funct.:
