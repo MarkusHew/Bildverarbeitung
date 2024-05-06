@@ -168,7 +168,8 @@ class GraphicsService():
         if debug:
             # cv2.imshow('Gray', gray)
             # cv2.imshow('Blur', blur)
-            cv2.imshow('Thresh', thresh)
+            #cv2.imshow('Thresh', thresh)
+            pass
 
         # Apply dilate to merge text into meaningful lines/paragraphs.
         # Use larger kernel on X axis to merge characters into single line, cancelling out any spaces.
@@ -176,13 +177,15 @@ class GraphicsService():
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 6)) # TODO: what does this influence?
         dilate = cv2.dilate(thresh, kernel, iterations=3)          # TODO: what does this interations influence? higher Number worse results?
         if debug:
-            cv2.imshow('Dilate', dilate)
+            pass
+            #cv2.imshow('Dilate', dilate)
 
         # Find all contours
         contours = self.cvExtractContours(dilate)
         if debug:
             temp1 = cv2.drawContours(newImage.copy(), contours, -1, (255, 0, 0), 2)
-            cv2.imshow('All Contours', temp1)
+            pass
+            #cv2.imshow('All Contours', temp1)
 
         # Find largest contour and surround in min area box
         largestContour = contours[0]
@@ -191,7 +194,8 @@ class GraphicsService():
         if debug:
             minAreaRectContour = np.int0(cv2.boxPoints(minAreaRect))
             temp2 = cv2.drawContours(newImage.copy(), [minAreaRectContour], -1, (255, 0, 0), 2)
-            cv2.imshow('Largest Contour', temp2)
+            pass
+            #cv2.imshow('Largest Contour', temp2)
             
         # Determine the angle. Convert it to the value that was originally used to obtain skewed image
         angle = minAreaRect[-1]

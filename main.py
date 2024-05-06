@@ -22,12 +22,13 @@ import cv2
 import platform
 from PIL import Image
 import pytesseract
-from src.webcam import Bild_aufnehmen
+from src.webcam import Bild_aufnehmen, Zusammenfugen
 import src.Texterkennung as tx
 from src.writetocsv import write_receipts_to_csv
 from src.graphics_service import GraphicsService
 from src.file_handling import FileHandling
 import src.DatatoCSV as cs
+import matplotlib.pyplot as plt
 
 
 fih=FileHandling("in","out")
@@ -60,10 +61,10 @@ def setup_Tesseract():
 
 n=1
 
-
 if(n==1): #Bild mit Webcam aufnehmen
     # Pfad in welchem das Bild gespeichert wird
-    img=Bild_aufnehmen(fih.getDirInput())
+    images=Bild_aufnehmen(1)     
+    img=Zusammenfugen(fih.getDirInput(),images)   
 
 if(n==2): #Bild aus Verzeichnis lesen
     try:
@@ -77,23 +78,17 @@ if(n==2): #Bild aus Verzeichnis lesen
 
 
 grs = GraphicsService()
-#result = fih.openAllFiles() # function returns img and it's path
-# print(len(result))
-#img, imgpath = result[3]
-#img=cv2.rotate(img,cv2.ROTATE_90_CLOCKWISE)
-#rotate,_=grs.deskew(img) 
-binary = grs.cvToBlackWhite(img, 1)
-#binary=grs.cvToGrayScale(img)
-#borders= grs.cvRemoveBorders(rotate)
-print(binary.shape)
-cv2.imwrite("binary.tif", binary)
+# binary = grs.cvToBlackWhite(img, 1)
+# #binary=grs.cvToGrayScale(img)
+# #borders= grs.cvRemoveBorders(rotate)
+# print(binary.shape)
+# cv2.imwrite("binary.tif", binary)
 rescaled = grs.cvApplyRescaling(img, 0.3)
-# cv2.imshow("Bild binaer und gedreht", rescaled)
-# cv2.waitKey(0)
-# print(img)
-# 
-# grs.displayImage(img)
-# grs.displayImage(imgpath)
+plt.imshow(img, cmap='gray')
+plt.axis('off')
+plt.title("zusammengefuegtes Bild")
+plt.show()
+
 ################################################################
 
 
@@ -112,9 +107,7 @@ rescaled = grs.cvApplyRescaling(img, 0.3)
 # # print(shop_name)
 # #######################################
 # #Methode die mit Textboxen arbeitet
-cv2.imshow("Bild pytasseract",binary)
-cv2.waitKey(0)
-img_boxes,text,tab=tx.textbox(binary,4)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
+img_boxes,text,tab=tx.textbox(img,4)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
 
 print("erkannter Text: ",text)
 #print(tab.to_string())
@@ -166,21 +159,7 @@ shop_UID = cs.extract_UID(text)
 from datetime import datetime
 now = datetime.now()
 date_string = now.strftime("%d%m%Y_%H;%M;%S")
-#
-    
-
-# Create a dictionary-/key-value-list of the receipt-extractions:
-# Receipt = [
-# {"items": "baked beans", "amount": "1", "price [CHF]": 23.50, "total price [CHF]": ""},
-# {"items": "milked cow", "amount": "1", "price [CHF]": "20.00", "total price [CHF]": ""},
-# {"items": "wonderful girl", "amount": "3", "price [CHF]": "2.65", "total price [CHF]": ""},
-# {"items": "tree", "amount": None, "price [CHF]": 3.80, "total price [CHF]": ""}, 
-# {"items": "", "amount": "", "price [CHF]": "", "total price [CHF]": total_price}
-# ]
-
-# Convert the Receipt list to a table format for prompting as a table within the terminal using tabulate
-#table = cs.tabulate(Receipt, headers="keys", tablefmt="fancy_grid")
-
+  
 # Print the table
 #print(table)
 
