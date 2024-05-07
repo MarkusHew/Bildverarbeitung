@@ -49,7 +49,7 @@ def extract_receipt_date(ocr_strList):
 
 #Func to extract shop address:
 def extract_shop_address(ocr_strList):
-    shop_address = " ".join(ocr_strList[8:11]) # Extract the address elements from ocr_strList-indices 5 and 6
+    shop_address = " ".join(ocr_strList[6:8]) # Extract the address elements from ocr_strList-indices 5 and 6
     return shop_address
 
 #Func to extract total price:

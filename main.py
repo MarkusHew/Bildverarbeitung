@@ -18,7 +18,6 @@ Bild an pytasseract übergeben und in Text umwandeln
 Text als Liste übergeben und in csv-file abspeichern
 
 """
-
 import os
 import cv2
 import platform
@@ -34,32 +33,7 @@ import matplotlib.pyplot as plt
 
 
 fih=FileHandling("in","out")
-# =============================================================================
-# # Setze die Umgebungsvariable TESSDATA_PREFIX Betriebssystemabhängig
-# # (Pfad wo die Tesseract-Sprachdateien abgelegt sind!)
-# if os.name == "posix":  # Linux or MacOS
-#     # Fuer Linux Ubuntu:
-#     #os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata" # Pfad wo die Tesseract-Sprachdateien abgelegt sind!
-#     os.environ["TESSDATA_PREFIX"] = "/home/riaanlinub/Desktop/Riaan_LinuxUbuntu/FHGR/3_FS24/Bildverarb1/PyVEnv_ImageProcessing/bin"
-#     print("Fuer Linux gesetzter Pfad der Umgebungsvariable 'TESSDATA_PREFIX':", os.environ["TESSDATA_PREFIX"])
-# elif os.name == "nt":  # Windows
-#     os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #Pfad muss auf jeweiligen Rechner angepasst werden #hier sind die Sprachdateien
-#     print("Fuer Windows gesetzter Pfad der Umgebungsvariable 'TESSDATA_PREFIX':", os.environ["TESSDATA_PREFIX"])
-# else:
-#     os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata"
-#     print("Unknown operating system. Assuming Linux system.")
-#     print("Gesetzter Pfad der Umgebungsvariable 'TESSDATA_PREFIX':", os.environ["TESSDATA_PREFIX"])
-# =============================================================================
-
 verz= os.getcwd()
-def setup_Tesseract():
-    enviroment_paths = os.environ['Path'].split(';')
-    tesseract_path = None
-    for localpath in enviroment_paths: 
-        lowlocalpath = localpath.lower()
-        if (lowlocalpath.find('tesseract') != -1):
-            tesseract_path = fih.editDir(localpath, "tesseract.exe")
-            pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
 n=1
 
@@ -71,7 +45,7 @@ if(n==1): #Bild mit Webcam aufnehmen
 if(n==2): #Bild aus Verzeichnis lesen
     try:
         # Öffne das Bild mit opencv        
-        result=fih.openSearchedFiles("CoopReceipt_scan_2024-04-12_11-24-29.png")#CoopReceipt_scan_2024-04-12_11-24-29.jpg        
+        result=fih.openSearchedFiles("stiched_image.tif")#CoopReceipt_scan_2024-04-12_11-24-29.jpg        
         img,pfad = result[0];
     except Exception as e:
         print(f"Fehler beim Öffnen des Bildes: {e}")
@@ -112,7 +86,7 @@ plt.show()
 img_boxes,text,tab=tx.textbox(img,4)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
 
 print("erkannter Text: ",text)
-#print(tab.to_string())
+print(tab.to_string())
 
 
 # Call funct. to extract shop_name from logo:
@@ -145,18 +119,9 @@ if total_price is not None:
 else:
     print('Total price not found in the OCR string list. \n')
 
-
-
 # Call the extract_UID function:
-shop_UID = cs.extract_UID(text)
-    
-# Time-code; Current date and time:
-# datetime object containing current date and time
-# now = datetime.now()
-# print("now =", now) # Output:	 now = 2022-12-27 10:09:20.430322
-# dd/mm/YY H:M:S
-# dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-# print("date and time =", dt_string) #Output:	 date and time = 27/12/2022 10:09:20
+shop_UID = cs.extract_UID(text)    
+
 # Import package for current date and time (Timecode):
 from datetime import datetime
 now = datetime.now()
@@ -191,7 +156,7 @@ cs.write_receipts_to_csv(file_path, combined_line_sublists, total_price, shop_na
 
 # ###########################################    
 # Ausgabe"
-#print("Erkannter Text:", text)
+print("Erkannter Text:", text[7])
 #print(result)
 # # print("Abstände zwischen den Wörtern:", word_distances)
 # # for w,d in zip(words,word_distances):

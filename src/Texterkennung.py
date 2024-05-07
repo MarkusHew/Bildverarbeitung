@@ -106,7 +106,8 @@ def textbox(img, Darstellung):   #Methode die mit Textboxen arbeitet und erkannt
     for i in range(len(data['text'])):
         # Text und Positionsinformationen extrahieren
         text = data['text'][i]
-        detected_text.append(text)
+        if not text=='':
+            detected_text.append(text)
         x, y, w, h = data['left'][i], data['top'][i], data['width'][i], data['height'][i]
         # Rechteck um den erkannten Text zeichnen
         if Darstellung==1 or Darstellung==4:
@@ -121,7 +122,7 @@ def textbox(img, Darstellung):   #Methode die mit Textboxen arbeitet und erkannt
 
     # Bild übergeben
     img_boxes = Bild_skalieren_und_Farbe(color_image, 400)
-
+    
     return img_boxes, detected_text, tab
 
 
@@ -170,7 +171,7 @@ def logo(img, pfad):  # OS-sensitive Methode die Logo in Bild erkennt und Shopna
         
         w, h = template.shape[0], template.shape[1]
         res = cv2.matchTemplate(color_image, template, cv2.TM_CCOEFF_NORMED)
-        threshold = 0.8
+        threshold = 0.4
         loc = np.where(res >= threshold)
         
         if loc[0].size > 0:  # If a match is found
@@ -199,7 +200,7 @@ def main():
     os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
     #os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata" # Fuer Linux Ubuntu
     
-    n=2 # 1:Shoplogo abspeichern, 2:Logo erkennen, 3: Text erkennen und ausgeben
+    n=1 # 1:Shoplogo abspeichern, 2:Logo erkennen, 3: Text erkennen und ausgeben
     try: #Bild öffnen aus ubergeordnetem Verzeichnis        
         current_directory = os.getcwd()
         print("Aktuelles Verzeichnis:", current_directory)
@@ -210,7 +211,6 @@ def main():
 
     except Exception as e:
         print(f"Fehler beim Öffnen des Bildes: {e}")
-
 
     if n==1:
         Bildlogo_erstellen(img)
@@ -224,9 +224,7 @@ def main():
         img_boxes,text,tab=textbox(img,2)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
         print("erkannter Text: ",text)
         print(tab.to_string())
-        #pprint.pprint(tab)    
-
-        
+        #pprint.pprint(tab)        
         cv2.imshow('Detected Text', img_boxes)
         cv2.waitKey(0)
 

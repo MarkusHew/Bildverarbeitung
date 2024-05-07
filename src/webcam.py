@@ -62,7 +62,7 @@ def Ausschnitt_wahlen(image, images):
     x = int(x / scale)
     y = int(y / scale)
     w = int(w / scale)
-    h = 1500
+    h = 1200 #Bildbreite
     # Bild ausschneiden
     cropped_img = image[y:y+h, x:x+w]
     rotate=cv2.rotate(cropped_img,cv2.ROTATE_90_COUNTERCLOCKWISE)  #Bild drehen
