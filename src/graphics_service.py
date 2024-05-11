@@ -45,10 +45,10 @@ class GraphicsService():
            
     
     def cvToGrayScale(self, cvImage): 
-        if (len(cvImage.shape) != 3): 
-            print("Grayscale is not applicable")
-            return cvImage
-        return cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
+        if (len(cvImage.shape) == 3): 
+            return cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
+        print("Grayscale is not applicable")
+        return cvImage
 
     def cvApplyGaussianBlur(self, cvImage, size: int):
         return cv2.GaussianBlur(cvImage, (size, size), 1)
@@ -111,17 +111,26 @@ class GraphicsService():
         largestContour = contours[0]
         x, y, w, h = cv2.boundingRect(largestContour)
         
-        print(cv2.boundingRect(largestContour))
+        # print(cv2.boundingRect(largestContour))
+        # countour = cv2.boundingRect(largestContour)
+        # color = cv2.cvtColor(cvImage, cv2.COLOR_GRAY2RGB)
+        # temp1 = cv2.drawContours(color.copy(), largestContour, -1, (255, 0, 0), 2)
+        # temp1 = cv2.rectangle(color.copy(), cv2.boundingRect(largestContour), (255, 0, 0), 2)
+        # cv2.imshow('All Contours', temp1)
         # crop = cvImage
         crop = cvImage[y:y+h, x:x+w]
+        
         return crop
     
-    def cvAddBorders():
+    def cvAddBorders(self, cvImage):
+        width, height = cvImage.shape[:2]
+        
         return None
 
     # Extracts all contours from the image, and resorts them by area (from largest to smallest)
     def cvExtractContours(self, cvImage):
-        blwh = self.cvToBlackWhite(cvImage, 3);
+        blwh = self.cvToBlackWhite(cvImage, 3)
+        # cv2.imshow("blackwhite", blwh)
         contours, hierarchy = cv2.findContours(blwh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key = cv2.contourArea, reverse = True)
         return contours
