@@ -44,7 +44,8 @@ def apply_thresh(image):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (51, 11))
     gray = cv2.GaussianBlur(gray, (3, 3), 0)
     blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, kernel)
-
+    cv2.imshow("blackhat", blackhat)
+    
     # compute the Scharr gradient of the blackhat image and scale the result into the range [0, 255]
     grad = cv2.Sobel(blackhat, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
     grad = np.absolute(grad)
@@ -169,23 +170,29 @@ tableCnt = filtered_cnts[NUMB_CNT]
 table = image[y:y + h, x:x + w]
 
 table_thresh = apply_thresh(table)
-kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, table_thresh.shape[0]))
+morph_rect_height = int(table_thresh.shape[0]/10)
+kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, morph_rect_height))
 table_dilate = cv2.dilate(table_thresh, kernel, iterations=1) 
+cv2.imshow("table_dialate", table_dilate)
 
 cnts = cv2.findContours(table_dilate.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 cnts = imutils.grab_contours(cnts)
+cnts = reversed(cnts)
 # cnts = filter_contours(cnts, table_dilate.shape[1])
 
 # resize_imshow(table_dilate, 50)
+i = 1
 for cnt in cnts:
     print(cv2.boundingRect(cnt))
     x,y,w,h = cv2.boundingRect(cnt)
-    table = table[y:y+h, x:x+w]
-    name = str(np.random.rand())
-    print(name)
-    cv2.imshow(name, table)
-    # resize_imshow(table, 30)
-
+    if h == table.shape[0]:
+        img_col = table[y:y+h, x:x+w]
+        name = "img_" + str(i)
+        # print(name)
+        cv2.imshow(name, img_col)
+        # resize_imshow(table, 30)
+        i+=1
+del i
 # show the original input image and extracted table to our screen
 plt_imshow("Input", image)
 plt_imshow("Table", table)

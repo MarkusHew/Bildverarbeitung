@@ -52,13 +52,35 @@ class GraphicsService():
 
     def cvApplyGaussianBlur(self, cvImage, size: int):
         return cv2.GaussianBlur(cvImage, (size, size), 1)
-
-    def cvToBlackWhite(self, cvImage, blurSize: int=1):
-        # source: https://docs.opencv.org/3.4/d7/d4d/tutorial_py_thresholding.html
+        
+    def cvToBlackWhite(self, cvImage, blurSize: int=3):
+        # initialize a rectangular kernel that is ~5x wider than it is tall,
+        # then smooth the image using a 3x3 Gaussian blur and then apply a
+        # blackhat morpholigical operator to find dark regions on a light background
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (51, 11))
         gray = self.cvToGrayScale(cvImage)
         blur = self.cvApplyGaussianBlur(gray, blurSize)
-        thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-        thresh = cv2.bitwise_not(thresh)
+        blackhat = cv2.morphologyEx(blur, cv2.MORPH_BLACKHAT, kernel)
+        
+        # compute the Scharr gradient of the blackhat image and scale the result into the range [0, 255]
+        grad = cv2.Sobel(blackhat, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
+        grad = np.absolute(grad)
+        (minVal, maxVal) = (np.min(grad), np.max(grad))
+        grad = (grad - minVal) / (maxVal - minVal)
+        grad = (grad * 255).astype("uint8")
+        
+        # apply a closing operation using the rectangular kernel to close gaps in between characters, 
+        #apply Otsu's thresholding method, and finally a dilation operation to enlarge foreground regions
+        grad = cv2.morphologyEx(grad, cv2.MORPH_CLOSE, kernel)
+        thresh = cv2.threshold(grad, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+        
+        
+# =============================================================================
+#         thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+#         thresh = cv2.bitwise_not(thresh)
+# =============================================================================
+        # source: https://docs.opencv.org/3.4/d7/d4d/tutorial_py_thresholding.html
+       
         # thresh = cv2.adaptiveThreshold(cvImage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
         #                                cv2.THRESH_BINARY, 11, 2)
         return thresh
@@ -128,11 +150,12 @@ class GraphicsService():
         return None
 
     # Extracts all contours from the image, and resorts them by area (from largest to smallest)
-    def cvExtractContours(self, cvImage):
+    def cvExtractContours(self, cvImage, sort_size: bool=False):
         blwh = self.cvToBlackWhite(cvImage, 3)
         # cv2.imshow("blackwhite", blwh)
-        contours, hierarchy = cv2.findContours(blwh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-        contours = sorted(contours, key = cv2.contourArea, reverse = True)
+        contours = cv2.findContours(blwh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if (sort_size == True):
+            contours = sorted(contours, key = cv2.contourArea, reverse = True)
         return contours
 
     # Apply new color to the outer border of the image
