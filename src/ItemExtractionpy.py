@@ -9,7 +9,8 @@ import numpy as np
 
 # only testing
 import os
-
+from graphics_service import GraphicsService
+grs = GraphicsService()
 
 def filter_contours(contours, image_width, **kwargs):
         # flags 
@@ -99,21 +100,33 @@ def apply_thresh(image):
 def get_tableofitems(cvImage):
     img_height, img_width = cvImage.shape[:2]
     morph_rect_width  = int(img_width/2)
-    morph_rect_height = int(2)
+    morph_rect_height = int(3)
     
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (morph_rect_width, morph_rect_height))
     thresh = apply_thresh(cvImage)
     dilate = cv2.dilate(thresh, kernel, iterations=1) 
+    cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    cv2.imshow("dilate", dilate)
+    # print(cnts, key=cv2.contourArea)
+    filtered_cnts = filter_contours(cnts, img_width)
+    print(len(filtered_cnts))
     
-    return None
+    # cv2.imshow("dilate", dilate)
+
+    for i in range(0, len(filtered_cnts)):
+        cnt = filtered_cnts[i]
+        x, y, w, h = cv2.boundingRect()
+        table = cvImage[y:y + h, x:x + w]
+        cv2.imshow(str(i), table)
+    
+    return dilate
     
 def get_median_sizes(contours):
     heights = []
     widths = []
     for cnt in contours:
-        x, y, w, h = cv2.boundingRect(cnt)
+        print("boom?")
+        (x, y, w, h) = cv2.boundingRect(cnt)
         heights.append(h)
         widths.append(w)
     if not heights or not widths:
@@ -126,9 +139,13 @@ def get_median_sizes(contours):
 # TESTING
 # =============================================================================
 def main():
-    images_list = ["image.tif", "CoopRechnung2.jpg", "03052024_Migros_Jannis.jpg"]
+    images_list = ["image.tif", "CoopRechnung2.jpg", "03052024_Migros_Jannis.jpg",
+                   "(2)120524_Coop_Haag_Chur.tif",
+                   "120524_Coop_ChurWest.tif",
+                   "120524_Coop_Haag_Chur.tif",
+                   "120524_CoopB+H_Chur.tif"]
     args = {
-    	"image": images_list[0],
+    	"image": images_list[-2],
     	"output": "results.csv",
     	"min_conf": 0,
     	"dist_thresh": 25.0,
@@ -139,7 +156,15 @@ def main():
     Verzeichnis=os.path.join(current_directory,"in", args["image"])
     image = cv2.imread(Verzeichnis)
     # itex = ItenExtraction()
-    get_tableofitems(image)
+    
+    dilate = get_tableofitems(image)
+    
+    
+    image = grs.cvApplyRescaling(image, 0.2)
+    dilate = grs.cvApplyRescaling(dilate, 0.2)
+    
+    cv2.imshow("image", image)
+    cv2.imshow("dilate", dilate)
     cv2.waitKey()
     return 0
 
