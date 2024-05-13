@@ -129,7 +129,7 @@ class GraphicsService():
     def cvRemoveBorders(self, cvImage): 
         # Don't use for PDF!
         # Don't use for automated task
-        contours = self.cvExtractContours(cvImage)
+        contours = self.cvExtractContours(cvImage, True)
         largestContour = contours[0]
         x, y, w, h = cv2.boundingRect(largestContour)
         

@@ -44,7 +44,7 @@ def apply_thresh(image):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (51, 11))
     gray = cv2.GaussianBlur(gray, (3, 3), 0)
     blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, kernel)
-    cv2.imshow("blackhat", blackhat)
+    # cv2.imshow("blackhat", blackhat)
     
     # compute the Scharr gradient of the blackhat image and scale the result into the range [0, 255]
     grad = cv2.Sobel(blackhat, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
