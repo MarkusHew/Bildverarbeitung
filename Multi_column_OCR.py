@@ -118,7 +118,7 @@ def filter_contours(contours, image_width):
 # parsing code with *hard coded* arguments and values # michael_jordan_stats.png # atevH.jpg
 images_list = ["image.tif", "CoopRechnung2.jpg", "03052024_Migros_Jannis.jpg"]
 args = {
-	"image": images_list[0],
+	"image": images_list[1],
 	"output": "results.csv",
 	"min_conf": 0,
 	"dist_thresh": 25.0,
