@@ -6,13 +6,73 @@ Created on Sun May 12 21:00:16 2024
 """
 import cv2
 import numpy as np
-import imutils
+import imutils # not needed?
 
 # only testing
 import os
 from graphics_service import GraphicsService
 grs = GraphicsService()
+# =============================================================================
+# functions
+# =============================================================================
+def get_tableofitems(cvImage, tablenum:int, getcols: bool=False):
+    TABLE_NUMBER = tablenum # statring at 0
+    
+    rows_img = get_receipt_row_images(cvImage)
+    
+    table_img = rows_img[TABLE_NUMBER]
+    tablecols_img = get_table_col_images(table_img)
+    
+    return (table_img, tablecols_img)
 
+
+def get_receipt_row_images(cvImage):
+    img_height, img_width = cvImage.shape[:2]
+    morph_rect_width  = img_width//2
+    morph_rect_height = img_width//40 # width const, but height variable due to amounts of items
+    print(cvImage.shape[:2])
+    
+    thresh = apply_thresh(cvImage)
+    thresh = reduce_noise(thresh, 3)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (morph_rect_width, morph_rect_height))
+    thresh = cv2.dilate(thresh, kernel, iterations=1) 
+    
+    test = grs.cvApplyRescaling(thresh, 0.2)
+    cv2.imshow("thresh", test)
+
+    cnts, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) # returns tuple with Array of int32
+    cnts = imutils.grab_contours((cnts, hierarchy))
+    filtered_cnts = filter_contours(cnts, img_width, centering=True, filtering=False)
+    
+    row_images = crop_images(cvImage, filtered_cnts)
+    
+    return row_images
+
+def get_table_col_images(table_img):
+    table_height, table_width = table_img.shape[:2]
+    
+    table_thresh = apply_thresh(table_img)
+    table_thresh = reduce_noise(table_thresh, 5)
+    
+    
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (table_width//41, table_height))
+    table_thresh = cv2.dilate(table_thresh, kernel, iterations=1)
+    
+    cnts, hierarchy = cv2.findContours(table_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) # returns tuple with Array of int32
+    cnts = imutils.grab_contours((cnts, hierarchy))
+    
+    filtered_cnts = filter_contours(cnts, table_width, centering=None, filtering='h')
+    
+    tablecols_img = crop_images(table_img, filtered_cnts)
+    return tablecols_img
+
+
+
+
+
+# =============================================================================
+# helping functions
+# =============================================================================
 def filter_contours(contours, image_width, **kwargs):
 # flags 
     centering = False
@@ -108,103 +168,52 @@ def apply_thresh(image):
     grad = cv2.morphologyEx(grad, cv2.MORPH_CLOSE, kernel)
     
     
+    # cv2.imshow("gradient", grad)
+    # thresh = cv2.threshold(grad, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+    # cv2.imshow("gradient THRESH", thresh)
     
     thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
     # thresh = cv2.bitwise_not(thresh)
     # thresh = cv2.threshold(grad, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
     return thresh
 
-
-def get_tableofitems(cvImage):
-    TABLE_NUMBER = 3 # statring at 0
-    
-    img_height, img_width = cvImage.shape[:2]
-    morph_rect_width  = int(img_width/2)
-    # morph_rect_width = int(1)
-    morph_rect_height = int(img_height/100)
-
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (morph_rect_width, morph_rect_height))
-    
-    thresh = apply_thresh(cvImage)
-    dilate = cv2.dilate(thresh, kernel, iterations=1) 
-    
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    # dilate = cv2.erode(dilate, kernel, iterations=3)
-    # cv2.imshow("dilate", dilate)
-    # cnts, _ = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    cnts, hierarchy = cv2.findContours(dilate.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) # returns tuple with Array of int32
-    cnts = imutils.grab_contours((cnts, hierarchy))
-    
-    # print(cnts, key=cv2.contourArea)
-    filtered_cnts = filter_contours(cnts, img_width, centering=True, filtering='w')
-    
-# =============================================================================
-#     for i in range(0, len(filtered_cnts)):
-#         cnt = filtered_cnts[i]
-#         (x, y, w, h) = cv2.boundingRect(cnt)
-#         crop = cvImage[y:y+h, x:x+w]
-#         cv2.imshow("img_"+str(i), crop)
-# =============================================================================
-    
-    cnt = filtered_cnts[TABLE_NUMBER]
-    (x, y, w, h) = cv2.boundingRect(cnt)
-    table_img = cvImage[y:y+h, x:x+w]
-    
-    table_img_h, table_img_w = table_img.shape[:2]
-    
-    
-    thresh_table = apply_thresh(table_img)
-    
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    erode_table = cv2.erode(thresh_table, kernel, iterations=1)
-    
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (table_img_w//41, table_img_h))
-    dilate_table = cv2.dilate(erode_table, kernel, iterations=1)
-
-    
-    cv2.imshow("table", table_img)
-    cv2.imshow("dilate table", dilate_table)
-    cnts, hierarchy = cv2.findContours(dilate_table.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) # returns tuple with Array of int32
-    cnts = imutils.grab_contours((cnts, hierarchy))
-    
-    # cv2.drawContours(table_img, cnts, -1, (0,255,200), 3)
-    # print(cnts, key=cv2.contourArea)
-    filtered_cnts = filter_contours(cnts, table_img_w, centering=None, filtering=None)
-    # table_titels = ["Artikel", "Menge", "Preis", "Aktion", "Total"]
-    print(table_img.shape[:2])
-    cols_of_table = []
-    for i in range(0, len(filtered_cnts)):
-        cnt = filtered_cnts[i]
+def crop_images(cvImage, contours):
+    crops = []    
+    for cnt in contours:
         (x, y, w, h) = cv2.boundingRect(cnt)
-        crop = table_img[:, x:x+w]
-        
-        print(crop.shape[:2])
-        cv2.imshow("img_"+str(i), crop)
-        
-        cols_of_table.append(crop)
+        crops.append(cvImage[y:y+h, x:x+w])
+    if not crops:
+        return [cvImage]
+    return crops
 
-
-# =============================================================================
-#     for i in range(0, len(filtered_cnts)):
-#         cnt = filtered_cnts[i]
-#         x, y, w, h = cv2.boundingRect()
-#         table = cvImage[y:y + h, x:x + w]
-#         cv2.imshow(str(i), table)
-#     
-# =============================================================================
-    return dilate
+def reduce_noise(thresh, kernelsize:int=3):
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernelsize, kernelsize))
+    opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+    return opening
     
 def get_median_sizes(contours):
+    # Lists to store heights and widths of contours
     heights = []
     widths = []
+    
+    # Iterate through each contour
     for cnt in contours:
+        # Extract the bounding rectangle coordinates
         x, y, w, h = cv2.boundingRect(cnt)
+        
+        # Append height and width to respective lists
         heights.append(h)
         widths.append(w)
+    
+    # Check if the lists are not empty
     if not heights or not widths:
         return None
+    
+    # Calculate the median height and width
     median_h = int(np.median(heights))
-    median_w = int(np.median(heights))
+    median_w = int(np.median(widths))
+    
+    # Return the median height and width as a tuple
     return  (median_h, median_w)
 
 # =============================================================================
@@ -217,7 +226,7 @@ def main():
                    "120524_Coop_Haag_Chur.tif",
                    "120524_CoopB+H_Chur.tif"]
     args = {
-    	"image": images_list[-4],
+    	"image": images_list[-1],
     	"output": "results.csv",
     	"min_conf": 0,
     	"dist_thresh": 25.0,
@@ -227,16 +236,21 @@ def main():
     print("Aktuelles Verzeichnis:", current_directory)
     Verzeichnis=os.path.join(current_directory,"in", args["image"])
     image = cv2.imread(Verzeichnis)
-    # itex = ItenExtraction()
     
-    dilate = get_tableofitems(image)
+    table, cols = get_tableofitems(image, 3)
     
     
     image = grs.cvApplyRescaling(image, 0.2)
-    dilate = grs.cvApplyRescaling(dilate, 0.2)
+    table = grs.cvApplyRescaling(table, 0.2)
     
     cv2.imshow("image", image)
-    cv2.imshow("dilate", dilate)
+    cv2.imshow("table", table)
+    
+    for i in range(0, len(cols)): 
+        col = cols[i]
+        col = grs.cvApplyRescaling(col, 0.4)
+        cv2.imshow("col_"+str(i), col)
+    
     cv2.waitKey()
     return 0
 
