@@ -101,7 +101,10 @@ def textbox(img, Darstellung):   #Methode die mit Textboxen arbeitet und erkannt
     tab.head()
     tab.groupby(['block_num','par_num','line_num'])['text'].apply(list)
 
+
     detected_text=[]
+    Artikelliste=[]
+    found=False
     artikel=[] #erste Spalte in Artikel speichern
     art_it=-1
     # Durch die erkannten Textblöcke iterieren und Rechtecke um sie zeichnen
@@ -110,7 +113,7 @@ def textbox(img, Darstellung):   #Methode die mit Textboxen arbeitet und erkannt
         # Text und Positionsinformationen extrahieren
         text = data['text'][i]
         if not text=='':
-            detected_text.append(text)
+            detected_text.append((text, data['line_num'][i]))
         x, y, w, h = data['left'][i], data['top'][i], data['width'][i], data['height'][i]
         # Rechteck um den erkannten Text zeichnen
         if Darstellung==1 or Darstellung==4:
@@ -123,29 +126,41 @@ def textbox(img, Darstellung):   #Methode die mit Textboxen arbeitet und erkannt
             index=str(i)
             cv2.putText(color_image, index, (x-10, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255,0, 0), 2)
         #1.Spalte extrahieren und in artikel speichern
-    
-        # text aus 1.Spalte in artikel speichern
-        if data['left'][i] < (img.shape[1] * 0.3) and data['left'][i] > 0:
-            if not data['text'][i] == '':
-                # Überprüfen, ob der Text auf derselben Zeile wie der vorherige Text liegt
-                if i > 0 and abs(data['top'][i] - data['top'][i-1]) <= 2:
-                    #artikel[art_it] += " " + data['text'][i]  # Text an den vorherigen Text anhängen
-                    print(data['text'][i], data['top'][i], data['top'][i-1])
-                    print("type: ",type(data['top'][i]))
-                else:
-                    print("akrtikel")
-                    # art_it+=1
-                    # artikel.append(data['text'][i])  # Neuen String zur Liste hinzufügen
-                    # print(artikel[art_it])
+
+        
+        if data['text'][i]=="artikel":
+            found==True
+            print("gefunden", data['left'][i])
+            l1=data['left'][i]
+            l2=data['left'][i+1]
+            l3=data['left'][i+2]
+            l4=data['left'][i+3]
+            l5=data['left'][i+4]
+            Artikelliste.append([("Artikel", l1), ("Menge",l2), ("Preis",l3), ("Aktion",l4), ("Total",l5)])            
+        
+        if found and abs(data['left'][i]- l1) <= 5:
+            print("test:" ,data['text'][i], data['left'][i])
+            Artikelliste.append([(data['text'][i], data['left'][i])])
+
+    print("Artikelliste: ", Artikelliste)
+
+        # # text aus 1.Spalte in artikel speichern
+        # if data['left'][i] < (img.shape[1] * 0.3) and data['left'][i] > 0:
+        #     if not data['text'][i] == '':
+        #         # Überprüfen, ob der Text auf derselben Zeile wie der vorherige Text liegt
+        #         if i > 0 and abs(data['top'][i] - data['top'][i-1]) <= 2:
+        #             #artikel[art_it] += " " + data['text'][i]  # Text an den vorherigen Text anhängen
+        #             print(data['text'][i], data['top'][i], data['top'][i-1])
+        #             print("type: ",type(data['top'][i]))
+        #         else:
+        #             print("akrtikel")
+        #             # art_it+=1
+        #             # artikel.append(data['text'][i])  # Neuen String zur Liste hinzufügen
+        #             # print(artikel[art_it])
     
     img_boxes = Bild_skalieren_und_Farbe(color_image, 400)
 
-    return img_boxes, detected_text, tab
-
-    
-
-    
-
+    return img_boxes, detected_text, tab 
 
 
 def boundingBox(img, Speicherpfad):
