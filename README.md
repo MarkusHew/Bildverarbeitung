@@ -1,4 +1,4 @@
-# Information extraction from OCR-output
+# Information extraction from OCR-output into a csv-file
 
 # Needed library imports
 ## Import csv-package for creating csv-file:
