@@ -49,7 +49,8 @@ def extract_receipt_date(ocr_strList):
 
 #Func to extract shop address:
 def extract_shop_address(ocr_strList):
-    shop_address = " ".join(ocr_strList[6:8]) # Extract the address elements from ocr_strList-indices 5 and 6
+    zeile2=[tupel[0] for tupel in ocr_strList if tupel[1] == 2]
+    shop_address = " ".join(zeile2) # Extract the address elements from ocr_strList-indices 5 and 6
     return shop_address
 
 #Func to extract total price:
@@ -72,41 +73,48 @@ def extract_total_price(ocr_strList):
 
 #Func to extract company identification number / Unternehmens-Identifikationsnummer (UID, eg. CHE-123.456.789) - Coop:
 def extract_UID(ocr_strList):
-    UID_pattern = r'\b\d{3}\.\d{3}\.\d{3}\b' # digit[0-9]=#: ###.###.###, 'CHE-' still needs to be put before this digit-pattern!
-    
-    try:
-        # Find the index of 'BAR' in the list
-        indexOfElementBAR = ocr_strList.index('BAR')
-        print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
+    UID_pattern = r'\b\w{3}\.\w{3}\b' # digit[0-9]=#: ###.###.###, 'CHE-' still needs to be put before this digit-pattern!
+    # Finden der Indizes der Tupel, die das Muster enthalten
+    UID = [word for word in ocr_strList if re.search(UID_pattern, word)]   
+    if UID:
+        print("UID: ",UID[0])
+        return UID[0]
+    else:
+        return None
+
+    # try:
+    #     # Find the index of 'BAR' in the list
+    #     indexOfElementBAR = ocr_strList.index('BAR')
+    #     print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
         
         
-        # Define the range of indices you want to extract
-        subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
-        subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within global bounds
+    #     # Define the range of indices you want to extract
+    #     subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
+    #     subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within global bounds
         
-    except ValueError as e:
-        print(f"Error while calling extract_UID(text): {e}, UID-pattern is searched over the entire OCR-output-string-list in order to find shop-UID anyway. ;-)")
-        subList_StartIndex = 0
-        subList_EndIndex = len(ocr_strList)
+    # except ValueError as e:
+    #     print(f"Error while calling extract_UID(text): {e}, UID-pattern is searched over the entire OCR-output-string-list in order to find shop-UID anyway. ;-)")
+    #     subList_StartIndex = 0
+    #     subList_EndIndex = len(ocr_strList)
     
-    # Get the sub-list of elements within the defined range
-    UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
+    # # Get the sub-list of elements within the defined range
+    # UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
     
-	# Get the sub-list of elements within the defined range
-	#UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
-    UID_sublist = ocr_strList
+	# # Get the sub-list of elements within the defined range
+	# #UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
+    # UID_sublist = ocr_strList
 	
-	# Convert the sub-list to a single string
-    UID_sublist2String = ' '.join(UID_sublist)
+	# # Convert the sub-list to a single string
+    # UID_sublist2String = ' '.join(ocr_strList)
     
-	# Check within the sub_list for UID-pattern match
-    UIDs_found = re.findall(UID_pattern, UID_sublist2String)
+	# # Check within the sub_list for UID-pattern match
+    # UIDs_found = re.findall(UID_pattern, UID_sublist2String)
     
-    if UIDs_found:
-        # Prepend 'CHE-' to the UID found and return it all together
-        return f'CHE-{UIDs_found[0]}'  # Assuming only one UID is expected in the element
+    # if UIDs_found:
+    #     # Prepend 'CHE-' to the UID found and return it all together
+    #     return f'CHE-{UIDs_found[0]}'  # Assuming only one UID is expected in the element
 	
-	# Return None if no UID is found
+	# # Return None if no UID is found
     return None
 
 

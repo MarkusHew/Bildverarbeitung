@@ -36,7 +36,7 @@ import src.ItemExtraction as itex
 fih=FileHandling("in","out")
 verz= os.getcwd()
 
-n=1
+n=2
 
 if(n==1): #Bild mit Webcam aufnehmen
     # Pfad in welchem das Bild gespeichert wird
@@ -65,7 +65,7 @@ binary = grs.cvToBlackWhite(img, 1)
 #binary=grs.cvToGrayScale(img)
 #borders= grs.cvRemoveBorders(rotate)
 print(binary.shape)
-cv2.imwrite("binary.tif", binary)
+cv2.imwrite("in/binary.tif", binary)
 rescaled = grs.cvApplyRescaling(img, 0.3)
 plt.imshow(img, cmap='gray')
 plt.axis('off')
@@ -85,6 +85,7 @@ print(tab.to_string())
 print(tab.to_string())
 #print(tab.to_string())
 
+#text=pytesseract.image_to_string(img, config="--psm 6")
 
 # Call funct. to extract shop_name from logo:
 found ,shop_name =tx.logo(img, verz)
@@ -95,15 +96,17 @@ else:
 
 # ##########################################
 
+nurText=[tupel[0] for tupel in text]
+print("nur Text: ", nurText)
 # # Call funct. to extract receipt-date out of string-list:
-# receipt_date = cs.extract_receipt_date(text)
+receipt_date = cs.extract_receipt_date(nurText)
 
 # # Call the shop_address funct.:
-# shopAddress = cs.extract_shop_address(text)
+shopAddress = cs.extract_shop_address(text)
 # print(f'This is the shop address: {shopAddress}\n')
 
 # # Call the extract_total_price function:
-# total_price = cs.extract_total_price(text)
+total_price = cs.extract_total_price(nurText)
 # # Check if the total price is extracted successfully:
 # if total_price is not None:
 #     print(f'Total price of shopping list items: {total_price} CHF \n')
@@ -113,7 +116,7 @@ else:
 
 
 # Call the extract_UID function:
-shop_UID = cs.extract_UID(text)
+shop_UID = cs.extract_UID(nurText)
     
 # Time-code; Current date and time:
 # datetime object containing current date and time
@@ -126,17 +129,9 @@ shop_UID = cs.extract_UID(text)
 from datetime import datetime
 now = datetime.now()
 date_string = now.strftime("%d%m%Y_%H;%M;%S")
-#
+
     
 
-# Create a dictionary-/key-value-list of the receipt-extractions:
-# Receipt = [
-# {"items": "baked beans", "amount": "1", "price [CHF]": 23.50, "total price [CHF]": ""},
-# {"items": "milked cow", "amount": "1", "price [CHF]": "20.00", "total price [CHF]": ""},
-# {"items": "wonderful girl", "amount": "3", "price [CHF]": "2.65", "total price [CHF]": ""},
-# {"items": "tree", "amount": None, "price [CHF]": 3.80, "total price [CHF]": ""}, 
-# {"items": "", "amount": "", "price [CHF]": "", "total price [CHF]": total_price}
-# ]
 
 # Convert the Receipt list to a table format for prompting as a table within the terminal using tabulate
 #table = cs.tabulate(Receipt, headers="keys", tablefmt="fancy_grid")
@@ -145,7 +140,7 @@ date_string = now.strftime("%d%m%Y_%H;%M;%S")
 #print(table)
 
 # Generate combined line sublists
-combined_line_sublists = cs.generate_line_sublists(text)
+combined_line_sublists = cs.generate_line_sublists(nurText)
 
 # Print the combined line sublists
 for i, combined_line_sublist in enumerate(combined_line_sublists, start=1):
