@@ -30,6 +30,7 @@ from src.graphics_service import GraphicsService
 from src.file_handling import FileHandling
 import src.DatatoCSV as cs
 import matplotlib.pyplot as plt
+import src.ItemExtraction as itex
 
 
 fih=FileHandling("in","out")
@@ -39,13 +40,14 @@ n=1
 
 if(n==1): #Bild mit Webcam aufnehmen
     # Pfad in welchem das Bild gespeichert wird
-    images=Bild_aufnehmen(1)     
+    images=Bild_aufnehmen(0)     
     img=Zusammenfugen(fih.getDirInput(),images)   
 
 if(n==2): #Bild aus Verzeichnis lesen
+    serachterms = ["stiched_image.tif", "Coop"]
     try:
         # Öffne das Bild mit opencv        
-        result=fih.openSearchedFiles("stiched_image.tif")#CoopReceipt_scan_2024-04-12_11-24-29.jpg        
+        result=fih.openSearchedFiles(serachterms[1])#CoopReceipt_scan_2024-04-12_11-24-29.jpg        
         img,pfad = result[0];
     except Exception as e:
         print(f"Fehler beim Öffnen des Bildes: {e}")

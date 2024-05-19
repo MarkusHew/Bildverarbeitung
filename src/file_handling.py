@@ -134,7 +134,7 @@ class FileHandling():
         result = []
         for root, dirs, files in os.walk(path):
                 for f in files: 
-                    if ((searchTerm in str(f)) or (searchTerm is None)): 
+                    if searchTerm is None or searchTerm in str(f): 
                         filePath = self.editDir(path, str(f))
                         item = self.openOneFile(filePath)
                         result.append((item, filePath)) 
@@ -148,7 +148,10 @@ class FileHandling():
         if ".pdf" in path:
             print("PDF detected")
             return
-        ImageCv = self._openImageCv(path)
+        try:
+            ImageCv = self._openImageCv(path)
+        except Exception as e:
+             print(f"Error during opening of image: \n{e}")
         return ImageCv
     
     def removeOneFile(self, path: str): 

@@ -27,6 +27,11 @@ pd.set_option('display.max_rows', None)  # Keine Begrenzung für die Anzahl von 
 pd.set_option('display.max_columns', None)  # Keine Begrenzung für die Anzahl von Spalten
 
 
+def Texterkennung_Spalten(bin_img):
+    tab = pytesseract.image_to_data(bin_img, lang="deu", config='--psm 4', output_type='data.frame')
+    print(tab)
+    return 0
+
 def Bild_skalieren_und_Farbe(img, width):
     height=(int(img.shape[0]*(width/img.shape[1]))) #Bild skalieren auf 1000*xxxx
     img_resize=cv2.resize(img,(width,height))
@@ -92,7 +97,7 @@ def Bildlogo_erstellen(img):    #Methode kann aus einem Bild das Logo extrahiere
 
     return clone
 
-
+# Darsetllung 1:Rechteck 2:texterkennung 3:index 4:alles
 def textbox(img, Darstellung):   #Methode die mit Textboxen arbeitet und erkannten Text als Liste zurückgibt
     color_image=Bild_skalieren_und_Farbe(img, 1000)
     data = pytesseract.image_to_data(color_image, lang="deu", config='--psm 6', output_type=pytesseract.Output.DICT)    #Bild in Text
@@ -130,8 +135,11 @@ def textbox(img, Darstellung):   #Methode die mit Textboxen arbeitet und erkannt
                 # Überprüfen, ob der Text auf derselben Zeile wie der vorherige Text liegt
                 if i > 0 and abs(data['top'][i] - data['top'][i-1]) <= 2:
                     #artikel[art_it] += " " + data['text'][i]  # Text an den vorherigen Text anhängen
-                    print(data['text'][i], data['top'][i], data['top'][i-1])
-                    print("type: ",type(data['top'][i]))
+# =============================================================================
+#                     print(data['text'][i], data['top'][i], data['top'][i-1])
+#                     print("type: ",type(data['top'][i]))
+# =============================================================================
+                    JANNIS = 1
                 else:
                     print("akrtikel")
                     # art_it+=1
@@ -237,7 +245,7 @@ def main():
     if n==1:
         Bildlogo_erstellen(img)
     if n==2:
-        found ,shop_name =logo(img, parent_directory)
+        found ,shop_name = logo(img, parent_directory)
         if found:
             print("Rechnung von: ",shop_name)
         else:
