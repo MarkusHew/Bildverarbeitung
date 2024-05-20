@@ -4,7 +4,7 @@
 @versions:  ver 0.0.0 - 01.04.2024 
             ver 0.0.1 - 25.04.2024 (Riaan Kaempfer; Minor changes for OS-dependant EnvVar-path-assignment)
             ver 0.0.2 - 03.05.2024 (Riaan Kaempfer; Error-catching, incase OCR doesn't recognise all relevant characters)
-            ver 1.0.0 - 20.05.2024 
+            ver 1.0.0 - 20.05.2024 (Jannis Mathiuet final version)
 @desc: 
     Bild aus Verzeichnis oder von Webcam oeffenen
     Bild in Graubild wandeln und mit opencv optimieren
@@ -31,8 +31,9 @@ import numpy as np
 # own functions
 from src.webcam import Bild_aufnehmen, Zusammenfugen
 import src.Texterkennung as tx
-from src.writetocsv import write_receipts_to_csv
 import src.DatatoCSV as cs
+import src.replaceUnwanted as rpu
+# from src.writetocsv import write_receipts_to_csv
 
 
 # classes and inits
@@ -48,112 +49,120 @@ itex = ItemExtraction()
 fih=FileHandling("in","out") # select relative in- and output paths
 
 mode = 1
-# Mode 1: Webcam
+csv_seperator = ',' # is either semicolon ';' or comma ','
+# webcam parameters for MODE 0
 webcam_num = 1
-# Mode 2: use saved image in input-folder
-searchterm = "120524_Coop_Haag_Chur" # when empty, opens all files 
+# searchterm for MODE 1 
+searchterm = "IMG_0607.jpg"#"20220928_Coop_Domat-Ems"#"120524_Coop_Haag_Chur" # when empty, opens all files 
 # =============================================================================
 
 
 def main():
+    DEBUG = False
     global mode
     global webcam_num
     global searchterm
-    img = None
+# =============================================================================
+    # diffrent modes
     
-    if mode == 0: # external webcam: take photos and sticks receipt together
+    # MODE 0 external webcam: take photos and sticks receipt together
+    if mode == 0: 
         images=Bild_aufnehmen(webcam_num)     
         img = Zusammenfugen(fih.getDirInput(),images)   
-        
-    if mode == 1: # folder: open a saved image from there
+        images = [img]
+    
+    # MODE 1 folder: open a saved image from there
+    if mode == 1: 
         if len(searchterm) == 0: # don't use serachterm and open all images in selected folder
             searchterm = None
         results = fih.openSearchedFiles(searchterm)
-        img, path = results[0]
-    img_table, img_cols = itex.get_tableofitems(img, 3)
-    grs.deskew(img_table)
-    for i in range(0, len(img_cols)):
-        img = img_cols[i]
-        gray = grs.cvToGrayScale(img)
-        gray = grs.cvApplyRescaling(gray, 2)
-        thresh = grs.cvToBlackWhite(gray, 1)
-        # gray = grs.cvApplyGaussianBlur(gray, 3)
-        # _, thresh_MAN = cv2.threshold(gray, 140, 255, cv2.THRESH_BINARY)
-        kernel = np.ones(11)
-        thresh_MAN = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
-        # thresh = grs.cvApplyThickerFont(thresh, 7)
-        # thresh = grs.cvApplyThinnerFont(thresh, 1)
-        cv2.imshow("thresh_"+str(i), thresh)
-        cv2.imshow("TEST"+str(i), thresh_MAN)
-        # tx.Texterkennung_Spalten(thresh)
-        img_boxes, text, tab = tx.textbox(thresh_MAN, 3)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
-        print("erkannter Text: ",text)
-        print(tab.to_string())
-        # print(tab.to_string())
-        # tx.Texterkennung_Spalten(thresh_MAN)
-        print(f"\n\n\n")
-        i+=1
-    return 0
-# =============================================================================
-# Markus Code
-# =============================================================================
-    binary = grs.cvToBlackWhite(img, 1)
-    #binary=grs.cvToGrayScale(img)
-    #borders= grs.cvRemoveBorders(rotate)
-    print(binary.shape)
-    cv2.imwrite("in/binary.tif", binary)
-    rescaled = grs.cvApplyRescaling(img, 0.3)
-    plt.imshow(img, cmap='gray')
-    plt.axis('off')
-    plt.title("zusammengefuegtes Bild")
-    plt.show()
-    
-    ################################################################
-    
-    # #Methode die mit Textboxen arbeitet
-    img_boxes,text,tab=tx.textbox(img,4)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
-    
-    # cv2.imshow("Bild pytasseract",binary)
-    # cv2.waitKey(0)
-    img_boxes,text,tab=tx.textbox(binary,4)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
-    print("erkannter Text: ",text)
-    print(tab.to_string())
-    print(tab.to_string())
-    #print(tab.to_string())
-
-    #text=pytesseract.image_to_string(img, config="--psm 6")
-
-    # Call funct. to extract shop_name from logo:
-    logo_path = fih.getDirLogos()
-    found, shop_name = tx.logo(img, logo_path)
-    if found:
-        print("Rechnung von: ", shop_name)    
-    else:
-        print("keine Ubereinstimmung")
-
-    # ##########################################
-    
-    nurText = [tupel[0] for tupel in text]
-    print("nur Text: ", nurText)
-    
-    cs.run_data_to_csv(shop_name, nurText, table_col_text, fih.getDirOutput())
-    
-    # ###########################################    
-    # Ausgabe"
-    print("Erkannter Text:", text[7])
-    #print(result)
-    # # print("Abstände zwischen den Wörtern:", word_distances)
-    # # for w,d in zip(words,word_distances):
-    # #     print(w,d,"\n")
-    cv2.imshow('Detected Text', img_boxes)
-    cv2.waitKey(0)
-
-    
-            
-            
+        images, paths = results
         
-    
+# =============================================================================
+    for img in images:
+        user_satisfied = False
+        previous_img = [img.copy()]
+        while(not user_satisfied):
+            print(len(previous_img))
+            current_img = previous_img[-1]
+            show_img = grs.cvApplyRescaling(current_img, 0.2)
+            cv2.imshow("q: abbrechen, w:weiter, c:zuscheiden, d:loeschen", show_img)
+            
+            key = cv2.waitKey(0)
+            if key == ord('c'):
+                new_img = grs.cvRemoveBorders(current_img)
+                previous_img.append(new_img)
+            if key == ord('d'): 
+                if len(previous_img) != 1:
+                    del previous_img[-1]
+            if key == ord('w'):
+                break
+            if key == ord('q'):
+                return -1
+        cv2.destroyAllWindows()
+        del previous_img
+        
+        binary = grs.cvToBlackWhite(img, 3)
+        binary = grs.cvApplyThickerFont(binary, 3)
+        img_boxes,text,tab=tx.textbox(img,4)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
+        # print("erkannter Text: ", text)
+        # print(tab.to_string())
+        # borders= grs.cvRemoveBorders(rotate)
+# =============================================================================
+#         print(binary.shape)
+#         cv2.imwrite("in/binary.tif", binary)
+#         grs.displayImage("in/binary.tif")
+#         rescaled = grs.cvApplyRescaling(img, 0.3)
+#         plt.imshow(img, cmap='gray')
+#         plt.axis('off')
+#         plt.title("zusammengefuegtes Bild")
+#         plt.show()
+# =============================================================================
+
+        # Call funct. to extract shop_name from logo:
+        logo_path = fih.getDirLogos()
+        found, shop_name = tx.logo(img, logo_path)
+        if found:
+            print("Rechnung von: ", shop_name)    
+        else:
+            print("keine Ubereinstimmung")
+
+        # ##########################################
+        
+        nurText = [tupel[0] for tupel in text]
+        print("nur Text: ", nurText)
+        
+        cv2.imshow('Detected Text', img_boxes)
+        cv2.waitKey(0)
+
+# =============================================================================
+        # find item table, extract columms and detect text
+        table_col_text = ()
+        for img in images:
+            img_table, img_cols = itex.get_tableofitems(img, 3)
+            # grs.deskew(img_table)
+            for i in range(0, len(img_cols)):
+                img = img_cols[i]
+                thresh = grs.cvToBlackWhite(img, 3)
+                thicker_font = grs.cvApplyThickerFont(thresh, 3)
+                
+                # read text from image and create list
+                spalte = tx.Texterkennung_Spalten(thicker_font)
+                table_col_text += (spalte, )
+                if DEBUG: 
+                    cv2.imshow("thresh_col"+str(i), thresh)
+                    cv2.imshow("thicker_Font_col"+str(i), thicker_font)
+                    print(spalte, f"\n")
+
+            print(table_col_text)
+# =============================================================================
+        
+        # wirte all data to csv file
+        csv_path = cs.run_data_to_csv(shop_name, nurText, table_col_text, fih.getDirOutput())
+        if csv_seperator != ';':
+            rpu.replace_char(csv_path, ';', ',')
     return 0
+
 
 if __name__ == "__main__":
     main()

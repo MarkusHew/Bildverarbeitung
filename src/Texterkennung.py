@@ -28,14 +28,30 @@ pd.set_option('display.max_columns', None)  # Keine Begrenzung für die Anzahl v
 
 
 def Texterkennung_Spalten(bin_img):
-    tab = pytesseract.image_to_data(bin_img, lang="equ", config='--psm 6', output_type='data.frame')
-    print(tab)
-    return 0
+    img_boxes, text_line, tab = textbox(bin_img, 3)
+    first_text = text_line[0]
+    spalte = [first_text[0]]
+    for i in range(1, len(text_line)):
+        # parameters
+        current_ele = text_line[i]
+        previous_ele = text_line[i-1]
+        
+        # elemment in previous row -> add to previous list item
+        if previous_ele[1] == current_ele[1]:
+            spalte[-1] += " " + current_ele[0]
+            
+        # element in new row -> add new list item
+        if  previous_ele[1] != current_ele[1]:
+            spalte.append(current_ele[0])
+    return spalte
 
 def Bild_skalieren_und_Farbe(img, width):
+    DEBUG = False
+    
     height=(int(img.shape[0]*(width/img.shape[1]))) #Bild skalieren auf 1000*xxxx
     img_resize=cv2.resize(img,(width,height))
-    print("skalierte Grösse",img_resize.shape)
+    if DEBUG: 
+        print("skalierte Grösse",img_resize.shape)
     if len(img.shape) > 2: #Farbkanäle des Eingangsbildes überprüfen und Ausgabebild in Farbe erstellen
         return img_resize 
     else:
@@ -98,7 +114,7 @@ def Bildlogo_erstellen(img):    #Methode kann aus einem Bild das Logo extrahiere
     return clone
 
 # Darsetllung 1:Rechteck 2:texterkennung 3:index 4:alles
-def textbox(img, Darstellung):   #Methode die mit Textboxen arbeitet und erkannten Text als Liste zurückgibt
+def textbox(img, Darstellung, DEBUG: bool=False):   #Methode die mit Textboxen arbeitet und erkannten Text als Liste zurückgibt
     color_image=Bild_skalieren_und_Farbe(img, 1000)
     data = pytesseract.image_to_data(color_image, lang="deu", config='--psm 6', output_type=pytesseract.Output.DICT)    #Bild in Text
     tab = pytesseract.image_to_data(color_image, lang="deu", config='--psm 6', output_type='data.frame')
@@ -118,24 +134,28 @@ def textbox(img, Darstellung):   #Methode die mit Textboxen arbeitet und erkannt
         # Text und Positionsinformationen extrahieren
         text = data['text'][i]
         if not text=='':
+            print
             detected_text.append((text, data['line_num'][i]))
         x, y, w, h = data['left'][i], data['top'][i], data['width'][i], data['height'][i]
+        
         # Rechteck um den erkannten Text zeichnen
         if Darstellung==1 or Darstellung==4:
             cv2.rectangle(color_image, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        
         # Text auf das Bild einfügen
         if Darstellung==2 or Darstellung==4:
             cv2.putText(color_image, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        
         # Index einfügen
         if Darstellung==3 or Darstellung==4:
             index=str(i)
             cv2.putText(color_image, index, (x-10, y), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255,0, 0), 2)
-        #1.Spalte extrahieren und in artikel speichern
-
         
+        #1.Spalte extrahieren und in artikel speichern
         if data['text'][i]=="artikel":
             found==True
-            print("gefunden", data['left'][i])
+            if DEBUG:
+                print("gefunden", data['left'][i])
             l1=data['left'][i]
             l2=data['left'][i+1]
             l3=data['left'][i+2]
@@ -144,10 +164,11 @@ def textbox(img, Darstellung):   #Methode die mit Textboxen arbeitet und erkannt
             Artikelliste.append([("Artikel", l1), ("Menge",l2), ("Preis",l3), ("Aktion",l4), ("Total",l5)])            
         
         if found and abs(data['left'][i]- l1) <= 5:
-            print("test:" ,data['text'][i], data['left'][i])
+            if DEBUG: 
+                print("test:", data['text'][i], data['left'][i])
             Artikelliste.append([(data['text'][i], data['left'][i])])
-
-    print("Artikelliste: ", Artikelliste)
+    if DEBUG:
+        print("Artikelliste: ", Artikelliste)
 
         # # text aus 1.Spalte in artikel speichern
         # if data['left'][i] < (img.shape[1] * 0.3) and data['left'][i] > 0:
@@ -190,8 +211,11 @@ def boundingBox(img, Speicherpfad):
     #print(ocr_result)   
     return color_image
 
+
 def logo(img, pfad):  # OS-sensitive Methode die Logo in Bild erkennt und Shopnamen zuruckgibt 
-    print("Aktuelles Verzeichnis:", pfad)
+    DEBUG = False
+    if DEBUG: 
+        print("Aktuelles Verzeichnis:", pfad)
     shop_names = {"Coop": "Logo_Coop.png", "Volg": "Logo_Volg.png"}
     found_shop = None
     
@@ -207,9 +231,11 @@ def logo(img, pfad):  # OS-sensitive Methode die Logo in Bild erkennt und Shopna
 
     for key, value in shop_names.items():
         color_image = Bild_skalieren_und_Farbe(img, 400)
-        template_path = os.path.join(pfad, 'in', value) # Pfaderweiterung per os.path.join() automatisch 
-                                                        # entspr. des erkannten Betriebssystems (OS)
+        template_path = os.path.join(pfad, value)   # Pfaderweiterung per os.path.join() automatisch 
+                                                    # entspr. des erkannten Betriebssystems (OS)
         template = cv2.imread(template_path)
+        if template is None:
+            return False, None
         
         w, h = template.shape[0], template.shape[1]
         res = cv2.matchTemplate(color_image, template, cv2.TM_CCOEFF_NORMED)
@@ -222,10 +248,10 @@ def logo(img, pfad):  # OS-sensitive Methode die Logo in Bild erkennt und Shopna
             # Highlight the found area in the image
             for pt in zip(*loc[::-1]):
                 cv2.rectangle(color_image, pt, (pt[0] + h, pt[1] + w), (0, 0, 255), 2)
-            
-            cv2.imshow('Ausschnitt in bild gefunden', color_image)
-            cv2.imshow('template', template)
-            cv2.waitKey(0)
+            if DEBUG:
+                cv2.imshow('Ausschnitt in bild gefunden', color_image)
+                cv2.imshow('template', template)
+                cv2.waitKey(0)
             
             return True, found_shop
     

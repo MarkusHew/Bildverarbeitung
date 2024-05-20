@@ -121,8 +121,9 @@ class GraphicsService():
 
     # Extracts all contours from the image, and resorts them by area (from largest to smallest)
     def cvExtractContours(self, cvImage):
-        blwh = self.cvToBlackWhite(cvImage, 3);
-        contours, hierarchy = cv2.findContours(blwh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        binary = self.cvToBlackWhite(cvImage, 100)
+        cv2.imshow("test", binary)
+        contours, hierarchy = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key = cv2.contourArea, reverse = True)
         return contours
 

@@ -6,6 +6,8 @@ import platform
 import os
 from src.graphics_service import GraphicsService
 
+SELECTION_HEIGHT = 0
+
 def Bild_aufnehmen(DEVICE_ID=1):    # change here, to open your preferred webcam
     
     if platform.system() == 'Windows':
@@ -27,7 +29,7 @@ def Bild_aufnehmen(DEVICE_ID=1):    # change here, to open your preferred webcam
     images=[]
     run=True
     while(run):
-        ret, frame = cap.read();
+        ret, frame = cap.read()
         if not ret:
             print('ERROR: could not read data from webcam')
             break;
@@ -39,18 +41,18 @@ def Bild_aufnehmen(DEVICE_ID=1):    # change here, to open your preferred webcam
         if ch==ord('a'):
             image=frame.copy()
             images=Ausschnitt_wahlen(image, images)
-            #run=False
         if ch==ord('0'):
             cap.set(cv2.CAP_PROP_SETTINGS,0);
         if ch==ord('q'):
             run=False
 
-    cap.release();
-    cv2.destroyAllWindows();
+    cap.release()
+    cv2.destroyAllWindows()
     return images
 
 def Ausschnitt_wahlen(image, images): 
-    grs = GraphicsService()  
+    grs = GraphicsService()
+    global SELECTION_HEIGHT
     image=image.copy()  
     # Skalieren des Bildes für die Auswahl
     scale = 0.3  # Skalierungsfaktor, kann nach Bedarf angepasst werden
@@ -58,11 +60,13 @@ def Ausschnitt_wahlen(image, images):
     # Select a region of interest (ROI)
     roi = cv2.selectROI("Select ROI and press Enter to confirm", small_image)
     x, y, w, h = roi
+    if SELECTION_HEIGHT == 0:
+        SELECTION_HEIGHT = h
     #Auf Originalbild umrechnen
     x = int(x / scale)
     y = int(y / scale)
     w = int(w / scale)
-    h = 1200 #Bildbreite
+    h = int(SELECTION_HEIGHT / scale)
     # Bild ausschneiden
     cropped_img = image[y:y+h, x:x+w]
     rotate=cv2.rotate(cropped_img,cv2.ROTATE_90_COUNTERCLOCKWISE)  #Bild drehen

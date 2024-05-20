@@ -18,11 +18,7 @@ import re
 # Import package for current date and time (Timecode):
 from datetime import datetime
 
-try: 
-    from file_handling import FileHandling
-    from src.file_handling import FileHandling
-except Exception as e:
-    print()
+import os
 # =============================================================================
 
 
@@ -89,13 +85,17 @@ def extract_receipt_date(ocr_strList):
             return dates_found[0]  # Assuming only one date is expected in the element
         
     # Return None if no date is found
-    return None
+    return str(None)
 
 
 #Func to extract shop address:
 def extract_shop_address(ocr_strList):
-    zeile2=[tupel[0] for tupel in ocr_strList if tupel[1] == 2]
-    shop_address = " ".join(zeile2) # Extract the address elements from ocr_strList-indices 5 and 6
+    shop_address = "None"
+    try: 
+        zeile2=[tupel[0] for tupel in ocr_strList if tupel[1] == 2]
+        shop_address = " ".join(zeile2) # Extract the address elements from ocr_strList-indices 5 and 6
+    except Exception as e:
+        print(e)
     return shop_address
 
 #Func to extract total price:
@@ -125,7 +125,7 @@ def extract_UID(ocr_strList):
         print("UID: ",UID[0])
         return UID[0]
     else:
-        return None
+        return str(None)
 
     # try:
     #     # Find the index of 'BAR' in the list
@@ -145,22 +145,22 @@ def extract_UID(ocr_strList):
     # # Get the sub-list of elements within the defined range
     # UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
     
-	# # Get the sub-list of elements within the defined range
-	# #UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
+    # # Get the sub-list of elements within the defined range
+    # #UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
     # UID_sublist = ocr_strList
-	
-	# # Convert the sub-list to a single string
+    
+    # # Convert the sub-list to a single string
     # UID_sublist2String = ' '.join(ocr_strList)
     
-	# # Check within the sub_list for UID-pattern match
+    # # Check within the sub_list for UID-pattern match
     # UIDs_found = re.findall(UID_pattern, UID_sublist2String)
     
     # if UIDs_found:
     #     # Prepend 'CHE-' to the UID found and return it all together
     #     return f'CHE-{UIDs_found[0]}'  # Assuming only one UID is expected in the element
-	
-	# # Return None if no UID is found
-    return None
+    
+    # # Return None if no UID is found
+    # return str(None)
 
 
 # Generate combined line sublists (a list of lists containing each product's details (item, amount, price)):
@@ -176,13 +176,13 @@ def generate_line_sublists(ocr_strList):
         index_of_Total = ocr_strList.index('Total')
     except ValueError:
         print("Error: 'Total' not found in the OCR string list.")
-        return None
+        return str(None)
 
     try:
         index_of_TOTAL = ocr_strList.index('TOTAL')
     except ValueError:
         print("Error: 'TOTAL' not found in the OCR string list.")
-        return None
+        return str(None)
     
     # Initialize a list to hold all line sublists
     line_sublists = []
@@ -228,7 +228,7 @@ def write_receipts_to_csv(folder_path, combined_line_sublists, total_price_chf, 
     now = datetime.now()
     date_string = now.strftime("%d%m%Y_%H%M%S")
     file_name = f"{ReceiptDate}_{ShopName}_ReceiptData{date_string}.csv"
-    file_path = FileHandling().editDir(folder_path, file_name)
+    file_path = os.path.join(folder_path, file_name)
     
     # Open CSV file in write mode
     # with open(file_path, mode='w', newline='') as csvfile:
@@ -292,8 +292,9 @@ def write_receipts_to_csv(folder_path, combined_line_sublists, total_price_chf, 
         except TypeError as e:
             print(f"Error in DatatoCSV.py: {e}, iteration over combined_line_sublists not possible, since combined_line_sublists couldn't be created, due to previous error(s)...")
         
-	# Write the total price to the CSV file
+    # Write the total price to the CSV file
         writer.writerow(['', '', '', total_price_chf])
+    return file_path
 
       
 
@@ -303,7 +304,7 @@ def write_receipts_to_csv(folder_path, combined_line_sublists, total_price_chf, 
 # =============================================================================
 from tabulate import tabulate # Tabulate package is only installed in the virtual environment PyVEnvImageProcessing, 
                             # so for this,  preferably execute this PyScript within the terminal with the appropriate VEnv activated!!
-import os
+
 
 # Function to convert ocr-text (as a single string) to a list of strings:
 def string_to_word_list(input_string):
@@ -320,30 +321,31 @@ def string_to_word_list(input_string):
 # Not needed for writing csv-file actually, just for table in Py-prompt!:
 # Generate dictionary for shop item details:
 def generate_dictionary(ocr_strList):
-	# Find the indices of 'Total' and 'TOTAL' in the list
-	dict_StartIndex = ocr_strList.index('Total')
-	dict_EndIndex = ocr_strList.index('TOTAL')
+    # Find the indices of 'Total' and 'TOTAL' in the list
+    dict_StartIndex = ocr_strList.index('Total')
+    dict_EndIndex = ocr_strList.index('TOTAL')
 
-	# Extract relevant elements for the dictionary
-	items = ocr_strList[dict_StartIndex + 1:dict_EndIndex]  # Elements between 'Total' and 'TOTAL'
-	amount = items[0]  # Assuming the first element after 'Total' is the amount
-	price_chf = items[1]  # Assuming the second element after 'Total' is the price in CHF
-	total_price_chf = items[2]  # Assuming the third element after 'Total' is the total price in CHF
+    # Extract relevant elements for the dictionary
+    items = ocr_strList[dict_StartIndex + 1:dict_EndIndex]  # Elements between 'Total' and 'TOTAL'
+    amount = items[0]  # Assuming the first element after 'Total' is the amount
+    price_chf = items[1]  # Assuming the second element after 'Total' is the price in CHF
+    total_price_chf = items[2]  # Assuming the third element after 'Total' is the total price in CHF
 
-	# Create the dictionary
-	receipt_dict = {
-		'items': ' '.join(items),
-		'amount': amount,
-		'price [CHF]': price_chf,
-		'total price [CHF]': total_price_chf
-	}
+    # Create the dictionary
+    receipt_dict = {
+        'items': ' '.join(items),
+        'amount': amount,
+        'price [CHF]': price_chf,
+        'total price [CHF]': total_price_chf
+    }
 
-	# Print the resulting dictionary
-	print(receipt_dict)
+    # Print the resulting dictionary
+    print(receipt_dict)
   
 
 def main():
-
+    from src.file_handling import FileHandling
+    fih = FileHandling()
     # For Tesseract Usage on Linux Ubuntu within command line terminal:
     # 1st: activate the Python environment where Tesseract-OCR package is installed
     # 2nd: change to the directory containing the image file to do the OCR-process on.
@@ -445,11 +447,11 @@ def main():
     #%% Time-code; Current date and time:
     # datetime object containing current date and time
     # now = datetime.now()
-    # print("now =", now) # Output:	 now = 2022-12-27 10:09:20.430322
+    # print("now =", now) # Output:     now = 2022-12-27 10:09:20.430322
 
     # dd/mm/YY H:M:S
     # dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    # print("date and time =", dt_string) #Output:	 date and time = 27/12/2022 10:09:20
+    # print("date and time =", dt_string) #Output:     date and time = 27/12/2022 10:09:20
 
     now = datetime.now()
     date_string = now.strftime("%d%m%Y_%H;%M;%S")
