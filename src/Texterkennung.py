@@ -28,7 +28,7 @@ pd.set_option('display.max_columns', None)  # Keine Begrenzung für die Anzahl v
 
 
 def Texterkennung_Spalten(bin_img):
-    tab = pytesseract.image_to_data(bin_img, lang="deu", config='--psm 4', output_type='data.frame')
+    tab = pytesseract.image_to_data(bin_img, lang="equ", config='--psm 6', output_type='data.frame')
     print(tab)
     return 0
 
@@ -43,7 +43,7 @@ def Bild_skalieren_und_Farbe(img, width):
 
 def Bildlogo_erstellen(img):    #Methode kann aus einem Bild das Logo extrahieren und abspeichern
     # Verzeichnis zum Speichern der ausgewählten Bildausschnitte
-    current_directory = os.getcwd()    
+    current_directory = os.getcwd()
     parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
     if not os.path.exists(parent_directory):
         print("Das Verzeichnis existiert nicht:", parent_directory)

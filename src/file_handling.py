@@ -2,10 +2,11 @@
 @data:      file_handling.py
 @author:    Jannis Mathiuet
 @versions:  ver 0.0.0 - 31.03.2024 - Jannis Mathiuet
-            ver 1.0.0 - 05.04.2024 - Jannis Mathiuet
+            ver 0.1.0 - 05.04.2024 - Jannis Mathiuet
+            ver 1.0.0 - 20.05.2024
 @desc: 
-    file to handle paths and files
-    If there are any questions, please contact me.
+    programm to handle paths and files
+    If there are any questions or problems, please contact me.
 """
 import os
 from PIL import Image as imageMain
@@ -24,12 +25,13 @@ class FileHandling():
     # =========================================================================
     # Path Functions (PUBLIC)
     # =========================================================================
-    def __init__(self, inRelPath: str="in", outRelPath: str="out", debug: bool=False): 
-        # global DIR_PARENT, DIR_INPUT, DIR_OUTPUT, CLASS_DEBUG
+    def __init__(self, inRelPath: str="in", outRelPath: str="out", 
+                 configRelPath: str="config", debug: bool=False): 
         
         DIR_PARENT = self._setDirParent()
         DIR_INPUT = self._setDirInput(inRelPath)
         DIR_OUTPUT = self._setDirOutput(outRelPath)
+        DIR_CONFIG = self._setDirConfig(configRelPath)
         CLASS_DEBUG = debug
         
         if CLASS_DEBUG is True:
@@ -51,6 +53,14 @@ class FileHandling():
     def getDirOutput(self):
         global DIR_OUTPUT
         return DIR_OUTPUT
+    
+    def getDirConfig(self):
+        global DIR_CONFIG
+        return DIR_CONFIG
+    
+    def getDirLogos(self):
+        global DIR_CONFIG
+        return self.editDir(DIR_CONFIG, "logos")
     
     def getAbsDir(self):
         path = os.getcwd()
@@ -116,6 +126,13 @@ class FileHandling():
         newpath = self.editDir(path, relpath)
         global DIR_OUTPUT 
         DIR_OUTPUT = newpath
+        return newpath
+    
+    def _setDirConfig(self, relPath: str):
+        path = self.getDirParent()
+        newpath = self.editDir(path, relPath)
+        global DIR_CONFIG
+        DIR_CONFIG = newpath
         return newpath
     # =========================================================================
     # Files Functions (PUBLIC)

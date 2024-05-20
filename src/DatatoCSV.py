@@ -18,7 +18,52 @@ import re
 # Import package for current date and time (Timecode):
 from datetime import datetime
 
+try: 
+    from file_handling import FileHandling
+    from src.file_handling import FileHandling
+except Exception as e:
+    print()
+# =============================================================================
 
+
+def run_data_to_csv(shop_name: str, full_text_list: list, 
+                    table_col_text: tuple, savepath: str):
+    # # Call funct. to extract receipt-date out of string-list:
+    receipt_date = extract_receipt_date(full_text_list)
+
+    # # Call the shop_address funct.:
+    shopAddress = extract_shop_address(full_text_list)
+    # print(f'This is the shop address: {shopAddress}\n')
+
+    # # Call the extract_total_price function:
+    total_price = extract_total_price(full_text_list)
+    # # Check if the total price is extracted successfully:
+    # if total_price is not None:
+    #     print(f'Total price of shopping list items: {total_price} CHF \n')
+    # else:
+    #     print('Total price not found in the OCR string list. \n')
+    
+    
+    # Call the extract_UID function:
+    shop_UID = extract_UID(full_text_list)
+
+    
+    # Print the table
+    #print(table)
+    
+    # Generate combined line sublists
+    combined_line_sublists = generate_line_sublists(full_text_list)
+    
+    # Print the combined line sublists
+    for i, combined_line_sublist in enumerate(combined_line_sublists, start=1):
+        print(f"combined_line_sublist_{i}: {combined_line_sublist}")
+
+    
+    # Construct the file path for the CSV-file and call CSV-file-writing funct.:
+    write_receipts_to_csv(savepath, combined_line_sublists,
+                             total_price, shop_name, shopAddress, shop_UID,
+                             receipt_date)
+    return 0
 
 # Function def to extract receipt date for a string-list as OCR-output within a specified range of list elements (start-/end_index): 
 # Should work for any Coop receipt (no matter how long it is).
@@ -178,9 +223,15 @@ def generate_line_sublists(ocr_strList):
 
 
 # Write extracted receipt data to a new CSV-file:           
-def write_receipts_to_csv(file_path, combined_line_sublists, total_price_chf, ShopName, ShopAddress, uid, ReceiptDate):
+def write_receipts_to_csv(folder_path, combined_line_sublists, total_price_chf, ShopName, ShopAddress, uid, ReceiptDate):
+    # create file name
+    now = datetime.now()
+    date_string = now.strftime("%d%m%Y_%H%M%S")
+    file_name = f"{ReceiptDate}_{ShopName}_ReceiptData{date_string}.csv"
+    file_path = FileHandling().editDir(folder_path, file_name)
+    
     # Open CSV file in write mode
-    #with open(file_path, mode='w', newline='') as csvfile:
+    # with open(file_path, mode='w', newline='') as csvfile:
     with open(file_path, mode='w', encoding='utf-8') as csvfile:
         # Create a CSV writer object
         try:

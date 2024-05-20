@@ -88,7 +88,7 @@ print(tab.to_string())
 #text=pytesseract.image_to_string(img, config="--psm 6")
 
 # Call funct. to extract shop_name from logo:
-found ,shop_name =tx.logo(img, verz)
+found ,shop_name = tx.logo(img, verz)
 if found:
     print("Rechnung von: ",shop_name)    
 else:
