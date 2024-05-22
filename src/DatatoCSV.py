@@ -35,33 +35,18 @@ def run_data_to_csv(shop_name: str, full_text_list: list,
 
     # # Call the extract_total_price function:
     total_price = extract_total_price(full_text_list)
-    # # Check if the total price is extracted successfully:
-    # if total_price is not None:
-    #     print(f'Total price of shopping list items: {total_price} CHF \n')
-    # else:
-    #     print('Total price not found in the OCR string list. \n')
-    
     
     # Call the extract_UID function:
     shop_UID = extract_UID(full_text_list)
 
     
-    # Print the table
-    #print(table)
-    
-    # Generate combined line sublists
-    combined_line_sublists = generate_line_sublists(full_text_list)
-    
-    # Print the combined line sublists
-    for i, combined_line_sublist in enumerate(combined_line_sublists, start=1):
-        print(f"combined_line_sublist_{i}: {combined_line_sublist}")
-
-    
     # Construct the file path for the CSV-file and call CSV-file-writing funct.:
-    write_receipts_to_csv(savepath, combined_line_sublists,
+    write_receipts_to_csv(savepath, table_col_text,
                              total_price, shop_name, shopAddress, shop_UID,
                              receipt_date)
     return 0
+
+
 
 # Function def to extract receipt date for a string-list as OCR-output within a specified range of list elements (start-/end_index): 
 # Should work for any Coop receipt (no matter how long it is).
@@ -90,6 +75,7 @@ def extract_receipt_date(ocr_strList):
     return str(None)
 
 
+
 #Func to extract shop address:
 def extract_shop_address(ocr_strList):
     shop_address = "None"
@@ -99,6 +85,8 @@ def extract_shop_address(ocr_strList):
     except Exception as e:
         print(e)
     return shop_address
+
+
 
 #Func to extract total price:
 def extract_total_price(ocr_strList):
@@ -118,6 +106,7 @@ def extract_total_price(ocr_strList):
     return None  # Return None if 'TOTAL' or the price is not found.
 
 
+
 #Func to extract company identification number / Unternehmens-Identifikationsnummer (UID, eg. CHE-123.456.789) - Coop:
 def extract_UID(ocr_strList):
     UID_pattern = r'\b\w{3}\.\w{3}\b' # digit[0-9]=#: ###.###.###, 'CHE-' still needs to be put before this digit-pattern!
@@ -128,6 +117,70 @@ def extract_UID(ocr_strList):
         return UID[0]
     else:
         return str(None)
+
+
+
+# Write extracted receipt data to a new CSV-file:           
+def write_receipts_to_csv(folder_path, table_col_text, total_price_chf, ShopName, ShopAddress, uid, ReceiptDate):
+    # create file name
+    now = datetime.now()
+    date_string = now.strftime("%d%m%Y_%H%M%S")
+    file_name = f"{ReceiptDate}_{ShopName}_ReceiptData{date_string}.csv"
+    file_path = os.path.join(folder_path, file_name)
+    
+    # Open CSV file in write mode
+    # with open(file_path, mode='w', newline='') as csvfile:
+    with open(file_path, mode='w', encoding='utf-8') as csvfile:
+        # Create a CSV writer object
+        try:
+            writer = csv.writer(csvfile, delimiter=SEPERATOR)
+            print("csv file erstellt in Verzeichnis: ", file_path)
+        except Exception as e:
+            print(f"Fehler beim erstellen des csv files: {e}")
+
+        # Write the shop name to the CSV file
+        writer.writerow(['Shop Name:', ShopName])
+        # Write the shop address to the CSV file
+        writer.writerow(['Shop Address:', ShopAddress])
+        # Write the shop's UID to the CSV file
+        writer.writerow(['Shop UID:', uid])
+        # Write the receipt date to the CSV file
+        writer.writerow(['Receipt date:', ReceiptDate])
+        
+        # Write an empty row for separation
+        writer.writerow([])
+        
+        # Write the receipt items to the CSV file
+        writer.writerow(['Items', 'Amount', 'Price [CHF]', 'Total Price [CHF]'])
+        
+        try:
+            items = table_col_text[0]
+            amounts = table_col_text[1]
+            prices_chf = table_col_text[-1]
+            for i in range(0, len(table_col_text[0])):
+                # Initialize variables
+                item = items[i]
+                amount = amounts[i]
+                price_chf = prices_chf[i]
+                
+                writer.writerow([item.strip(), amount, price_chf, ''])
+            writer.writerow([])
+            # Write the total price to the CSV file
+            writer.writerow(['-----', '-----', '-----', total_price_chf])
+            
+        except TypeError as e:
+            print(f"Error in DatatoCSV.py: {e}, iteration over combined_line_sublists not possible, since combined_line_sublists couldn't be created, due to previous error(s)...")
+
+    return file_path
+
+      
+
+
+# =============================================================================
+# TESTING
+# =============================================================================
+from tabulate import tabulate # Tabulate package is only installed in the virtual environment PyVEnvImageProcessing, 
+                            # so for this,  preferably execute this PyScript within the terminal with the appropriate VEnv activated!!
 
 
 # Generate combined line sublists (a list of lists containing each product's details (item, amount, price)):
@@ -184,106 +237,6 @@ def generate_line_sublists(ocr_strList):
     return combined_line_sublists
 
 
-
-#Func for indices according to the different shop's receipt-patterns / -extraction-methods:
-
-
-
-# Write extracted receipt data to a new CSV-file:           
-def write_receipts_to_csv(folder_path, table_col_text, total_price_chf, ShopName, ShopAddress, uid, ReceiptDate):
-    # create file name
-    now = datetime.now()
-    date_string = now.strftime("%d%m%Y_%H%M%S")
-    file_name = f"{ReceiptDate}_{ShopName}_ReceiptData{date_string}.csv"
-    file_path = os.path.join(folder_path, file_name)
-    
-    # Open CSV file in write mode
-    # with open(file_path, mode='w', newline='') as csvfile:
-    with open(file_path, mode='w', encoding='utf-8') as csvfile:
-        # Create a CSV writer object
-        try:
-            writer = csv.writer(csvfile, delimiter=SEPERATOR)
-            print("csv file erstellt in Verzeichnis: ", file_path)
-        except Exception as e:
-            print(f"Fehler beim erstellen des csv files: {e}")
-
-        # Write the shop name to the CSV file
-        writer.writerow(['Shop Name:', ShopName])
-        # Write the shop address to the CSV file
-        writer.writerow(['Shop Address:', ShopAddress])
-        # Write the shop's UID to the CSV file
-        writer.writerow(['Shop UID:', uid])
-        # Write the receipt date to the CSV file
-        writer.writerow(['Receipt date:', ReceiptDate])
-        
-        # Write an empty row for separation
-        writer.writerow([])
-        
-        # Write the receipt items to the CSV file
-        writer.writerow(['Items', 'Amount', 'Price [CHF]', 'Total Price [CHF]'])
-        
-        try:
-            items = table_col_text[0]
-            amounts = table_col_text[1]
-            prices_chf = table_col_text[-1]
-            for i in range(0, len(table_col_text[0])):
-                # Initialize variables
-                item = items[i]
-                amount = amounts[i]
-                price_chf = prices_chf[i]
-                found_amount = False
-                found_price = False
-            
-            # Iterate over combined_line_sublists
-            for sublist_of_CoLiSu in combined_line_sublists:
-                # Initialize variables
-                items = ''
-                amount = ''
-                price_chf = ''
-                found_amount = False
-                found_price = False
-                
-                # Iterate over elements in the sublist_of_CoLiSu
-                for i in range(len(sublist_of_CoLiSu)):
-                    # If the element contains digits, it's either 'Amount' or 'Price [CHF]'
-                    if re.search(r'\d', sublist_of_CoLiSu[i]):
-                        if not found_amount:
-                            amount = sublist_of_CoLiSu[i]
-                            found_amount = True
-                        elif not found_price:
-                            price_chf = sublist_of_CoLiSu[i]
-                            found_price = True
-                            # Since we only need the first amount and price_chf, we break after finding them
-                            break
-                     # If the element is a string, concatenate it to the 'items' string
-                    else:
-                        items += sublist_of_CoLiSu[i] + ' '
-                
-                # Write the extracted elements to the CSV file
-                writer.writerow([items.strip(), amount, price_chf, ''])
-            # Write an empty row for separation
-            writer.writerow([])
-            
-            # Write the total price to the CSV file
-            writer.writerow(['', '', '', total_price_chf])
-            
-        except TypeError as e:
-            print(f"Error in DatatoCSV.py: {e}, iteration over combined_line_sublists not possible, since combined_line_sublists couldn't be created, due to previous error(s)...")
-        
-    # Write the total price to the CSV file
-        writer.writerow(['', '', '', total_price_chf])
-    return file_path
-
-      
-
-
-# =============================================================================
-# TESTING
-# =============================================================================
-from tabulate import tabulate # Tabulate package is only installed in the virtual environment PyVEnvImageProcessing, 
-                            # so for this,  preferably execute this PyScript within the terminal with the appropriate VEnv activated!!
-
-
 # Function to convert ocr-text (as a single string) to a list of strings:
 def string_to_word_list(input_string):
     # # Split the input string into words
@@ -319,7 +272,11 @@ def generate_dictionary(ocr_strList):
 
     # Print the resulting dictionary
     print(receipt_dict)
-  
+    return 0
+
+
+
+
 
 def main():
     from src.file_handling import FileHandling
@@ -331,82 +288,6 @@ def main():
     # 4th: View the extracted text in the appropriate txt-file. 
     ocr_text = """
     coop
-
-    Für mich und dich.
-
-    Solothurn Rosengarten
-
-    Artikel
-
-    Menge
-
-    Preis Aktion
-
-    Total
-
-    Free From Risottofil
-
-    1 5.95
-
-    5.95 0
-
-    Emmi Caffè Latte
-
-    1
-
-    1.95
-
-    1.95 0
-
-    Mini Babybel
-
-    1 5.10
-
-    5.10 0
-
-    Cractiv Chips Natur
-
-    1 2.35
-
-    2.35 0
-
-    TOTAL CHF
-
-    15.35
-
-    BAR
-
-    20.00
-
-    Zurück CHF
-
-    -4.65
-
-    COOP GENOSSENSCHAFT, CHE-116.311.185 MWST
-
-    GR
-
-    MWST%
-
-    TOTAL
-
-    MWST
-
-    0
-
-    2.50
-
-    15.35
-
-    0.37
-
-    ES BEDIENTE SIE Frau Demuth
-
-    Vielen Dank für Ihren Einkauf
-
-    9900010709121111700015351101
-
-    21.11.17 15:15 07091 00384371 001 0001101
     """
 
     ocr_strList = string_to_word_list(ocr_text)

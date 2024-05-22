@@ -46,19 +46,21 @@ itex = ItemExtraction()
 # =============================================================================
 # USER PARAMETERS
 # =============================================================================
+# CSV Seperator
+# is either semicolon ';' or comma ',' currently doesnt work
+# ==> for new csv: change SEPERATOR in DatatoCSV.py 
+# ==> for already generated csv: use replaceUnwanted.py
+#              change filename to desired filename run code
+
 fih=FileHandling("in","out") # select relative in- and output paths
 
 mode = 1
-csv_seperator = ',' # is either semicolon ';' or comma ','
-                    # if this here doesn't work  
-                    # ==> for new csv: change SEPERATOR in DatatoCSV.py 
-                    # ==> for already generated csv: use replaceUnwanted.py
-                    #              change filename to desired filename run code
+ 
 
 # webcam parameters for MODE 0
 webcam_num = 1
 # searchterm for MODE 1 
-searchterm = "IMG_0641.jpg"#"IMG_0607.jpg"#"20220928_Coop_Domat-Ems"#"120524_Coop_Haag_Chur" # when empty, opens all files 
+searchterm = "IMG_0641.jpg" # when empty, opens all files 
 # =============================================================================
 
 
@@ -85,26 +87,38 @@ def main():
         
 # =============================================================================
     for img in images:
+        print("USER VORBEREITUNG")
         img, success = grs.imgPreperationUser(img)
         if not success:
             return -1
+        print(f"\n\n")
+# =============================================================================
+        print("TABELLE")
+        # find item table, extract columms and detect text
+        table_col_text = ()
+        img_table, img_cols = itex.get_tableofitems(img, 3)
         
+        print("gefundener Text in Spalten: ")
+        for i in range(0, len(img_cols)):
+            current_img = img_cols[i]
+            thresh = grs.cvToBlackWhite(current_img, 3)
+            thicker_font = grs.cvApplyThickerFont(thresh, 3)
+            
+            # read text from image and create list
+            spalte = tx.Texterkennung_Spalten(thicker_font)
+            table_col_text += (spalte, )
+            
+            print(spalte)
+            if DEBUG: 
+                cv2.imshow("thresh_col"+str(i), thresh)
+                cv2.imshow("thicker_Font_col"+str(i), thicker_font)
+                print(spalte)
+            
+        print(f"\n\n")
+# =============================================================================
         binary = grs.cvToBlackWhite(img, 3)
         binary = grs.cvApplyThickerFont(binary, 3)
         img_boxes,text,tab=tx.textbox(img, 4)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
-        # print("erkannter Text: ", text)
-        # print(tab.to_string())
-        # borders= grs.cvRemoveBorders(rotate)
-# =============================================================================
-#         print(binary.shape)
-#         cv2.imwrite("in/binary.tcif", binary)
-#         grs.displayImage("in/binary.tif")
-#         rescaled = grs.cvApplyRescaling(img, 0.3)
-#         plt.imshow(img, cmap='gray')
-#         plt.axis('off')
-#         plt.title("zusammengefuegtes Bild")
-#         plt.show()
-# =============================================================================
 
         # Call funct. to extract shop_name from logo:
         logo_path = fih.getDirLogos()
@@ -113,40 +127,23 @@ def main():
             print("Rechnung von: ", shop_name)    
         else:
             print("keine Ubereinstimmung")
-
+        print(f"\n")
         # ##########################################
         
         nurText = [tupel[0] for tupel in text]
-        print("nur Text: ", nurText)
-        
+        print("nur Text: ")
+        print(nurText)
+        print(f"\n\n\n")
         cv2.imshow('Detected Text', img_boxes)
         cv2.waitKey(0)
+        
 
 # =============================================================================
-        # find item table, extract columms and detect text
-        table_col_text = ()
-        img_table, img_cols = itex.get_tableofitems(img, 3)
-        # grs.deskew(img_table)
-        for i in range(0, len(img_cols)):
-            img = img_cols[i]
-            thresh = grs.cvToBlackWhite(img, 3)
-            thicker_font = grs.cvApplyThickerFont(thresh, 3)
-            
-            # read text from image and create list
-            spalte = tx.Texterkennung_Spalten(thicker_font)
-            table_col_text += (spalte, )
-            if DEBUG: 
-                cv2.imshow("thresh_col"+str(i), thresh)
-                cv2.imshow("thicker_Font_col"+str(i), thicker_font)
-                print(spalte, f"\n")
-
-        print(table_col_text)
-           
-# =============================================================================
+        print("CSV")        
         # wirte all data to csv file
         csv_path = cs.run_data_to_csv(shop_name, nurText, table_col_text, fih.getDirOutput())
-        if csv_seperator != ';':
-            rpu.replace_char(csv_path, ';', ',')
+        # if csv_seperator != ';':
+        #     rpu.replace_char(csv_path, ';', ',')
     return 0
 
 

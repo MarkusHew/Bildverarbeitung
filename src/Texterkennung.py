@@ -171,20 +171,6 @@ def textbox(img, Darstellung, DEBUG: bool=False):   #Methode die mit Textboxen a
             Artikelliste.append([(data['text'][i], data['left'][i])])
     if DEBUG:
         print("Artikelliste: ", Artikelliste)
-
-        # # text aus 1.Spalte in artikel speichern
-        # if data['left'][i] < (img.shape[1] * 0.3) and data['left'][i] > 0:
-        #     if not data['text'][i] == '':
-        #         # Überprüfen, ob der Text auf derselben Zeile wie der vorherige Text liegt
-        #         if i > 0 and abs(data['top'][i] - data['top'][i-1]) <= 2:
-        #             #artikel[art_it] += " " + data['text'][i]  # Text an den vorherigen Text anhängen
-        #             print(data['text'][i], data['top'][i], data['top'][i-1])
-        #             print("type: ",type(data['top'][i]))
-        #         else:
-        #             print("akrtikel")
-        #             # art_it+=1
-        #             # artikel.append(data['text'][i])  # Neuen String zur Liste hinzufügen
-        #             # print(artikel[art_it])
     
     img_boxes = Bild_skalieren_und_Farbe(color_image, 400)
 

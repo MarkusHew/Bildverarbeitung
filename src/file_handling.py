@@ -3,7 +3,7 @@
 @author:    Jannis Mathiuet
 @versions:  ver 0.0.0 - 31.03.2024 - Jannis Mathiuet
             ver 0.1.0 - 05.04.2024 - Jannis Mathiuet
-            ver 1.0.0 - 20.05.2024
+            ver 1.0.0 - 20.05.2024 - Jannis Mathiuet
 @desc: 
     programm to handle paths and files
     If there are any questions or problems, please contact me.

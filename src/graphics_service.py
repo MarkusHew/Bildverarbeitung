@@ -5,6 +5,7 @@
             ver 1.0.0 - 05.04.2024 - Jannis Mathiuet
             ver 2.0.0 - 20.05.2024 - Jannis Mathiuet (final version)
 @source:    https://github.com/JPLeoRX/opencv-text-deskew/tree/master/python-service/services
+            (for some of the code)
 @desc: 
     multiple functions for image processing
     some are currently not used
@@ -27,24 +28,34 @@ class GraphicsService():
             print("aktueller Stand: ", len(previous_img))
             current_img = previous_img[-1]
             show_img = self.cvApplyRescaling(current_img, 0.2)
-            cv2.imshow("q: abbrechen, w:weiter, c:zuscheiden, r:zurueck", show_img)
+            cv2.imshow("q: abbrechen, w:weiter, c:zuscheiden, f: 180deg drehen, r:zurueck", show_img)
             
             key = cv2.waitKey(0)
             if key == ord('c'):
                 new_img = self.cropManual(current_img)
                 previous_img.append(new_img)
+                
+            if key == ord('f'): 
+                new_img = cv2.rotate(current_img, cv2.ROTATE_180)
+                previous_img.append(new_img)
+                
             if key == ord('r'): 
                 if len(previous_img) != 1:
                     del previous_img[-1]
+                    
             if key == ord('w') or key == 13:
                 user_satisfied = True
+                
             if key == ord('q') or key == 27:
                 cv2.destroyAllWindows()
                 return cvImage, False
+            
         cv2.destroyAllWindows()
         img = previous_img[-1]
         del previous_img
         return img, True
+    
+    
     
     def displayImage(self, path:str):
         if type(path) is not str:
@@ -73,6 +84,8 @@ class GraphicsService():
             
         return None
     
+    
+    
     def cropManual(self, cvImage):
         image = cvImage.copy()  
         # Skalieren des Bildes für die Auswahl
@@ -94,18 +107,12 @@ class GraphicsService():
         
         # Bild ausschneiden
         cropped_img = cvImage[y:y+h, x:x+w]
-        # rotate = cv2.rotate(cropped_img,cv2.ROTATE_90_COUNTERCLOCKWISE)  #Bild drehen
         cropped_img = self.cvRemoveBorders(cropped_img)
         rotate = self.deskew(cropped_img)    #Bild nach Zeile ausrichten
-        # img_show = cv2.resize(rotate, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
-        # img_name = "Bildausschnitt, weiter 'w'"
-        # cv2.imshow(img_name,img_show)    
-        # while True: #Anzeige abbrechen
-        #     key = cv2.waitKey(0)
-        #     if key == ord('w'):
-        #         cv2.destroyWindow(img_name)
-        #         break     
+
         return rotate
+    
+    
     
     def fill_contour2border(self, cvImage, contour, white: bool):
         # Create a mask with the same dimensions as the image
@@ -122,11 +129,15 @@ class GraphicsService():
         newImage = cv2.drawContours(cvImage, [contour], -1, white*(255, 255, 255), thickness=cv2.FILLED)
         return newImage
     
+    
+    
     def cvToGrayScale(self, cvImage): 
         if (len(cvImage.shape) != 3): 
             print("Grayscale is not applicable")
             return cvImage
         return cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
+
+
 
     def cvApplyGaussianBlur(self, cvImage, size: int):
         if type(size) is not int:
@@ -138,14 +149,14 @@ class GraphicsService():
             size += 1
         return cv2.GaussianBlur(cvImage, (size, size), 1)
 
-    def cvToBlackWhite(self, cvImage, blurSize: int=1):
+
+
+    def cvToBlackWhite(self, cvImage, blurSize: int=1): # returns white image with black highlights (e.g.text)
         # source: https://docs.opencv.org/3.4/d7/d4d/tutorial_py_thresholding.html
         gray = self.cvToGrayScale(cvImage)
         blur = self.cvApplyGaussianBlur(gray, blurSize)
         thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
         thresh = cv2.bitwise_not(thresh)
-        # thresh = cv2.adaptiveThreshold(cvImage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
-        #                                cv2.THRESH_BINARY, 11, 2)
         return thresh
     
     def cvApplyNoiseRemoval(self, cvImage): 
@@ -159,9 +170,6 @@ class GraphicsService():
         cvImage = cv2.morphologyEx(cvImage, cv2.MORPH_CLOSE, kernel)
         cvImage = cv2.medianBlur(cvImage, 3) 
         
-        # direkte Fuktion von opencv (ausprobieren) 
-        # Quelle: https://docs.opencv.org/3.4/d1/d79/group__photo__denoise.html#ga4c6b0031f56ea3f98f768881279ffe93
-        # cv2.fastNlMeansDenoising(im_bw, noNoise_image, 11)
         return cvImage
     
     def cvApplyThickerFont(self, cvImage, fsize: int=1):
@@ -260,7 +268,7 @@ class GraphicsService():
         h_img, w_img = cvImage.shape[:2]
         if (h_img < w_img):
             cvImage = cv2.rotate(cvImage, cv2.ROTATE_90_CLOCKWISE)
-        skewangle = self.getSkewAngle(cvImage, True)
+        skewangle = self.getSkewAngle(cvImage, False)
         # print(angle)
         # return self.rotateImage(cvImage, -1.0 * angle), angle
         return self.rotateImage(cvImage, -1.0 * skewangle)
@@ -269,22 +277,26 @@ class GraphicsService():
     def getSkewAngle(self, cvImage, debug: bool = False) -> float:
         # Prep image, copy, convert to gray scale, blur, and threshold
         newImage = cvImage.copy()
-        
+        if debug:  
+            temp = self.cvApplyRescaling(newImage, 0.2)
+            cv2.imshow('Input', temp)
         # gray = GraphicsService().cvToGrayScale(newImage)
         # blur = GraphicsService().cvApplyGaussianBlur(gray, 11)
         # thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
         thresh = self.cvToBlackWhite(newImage, 101)
         if debug:
+            
             # cv2.imshow('Gray', gray)
             # cv2.imshow('Blur', blur)
-            #cv2.imshow('Thresh', thresh)
+            temp0 = self.cvApplyRescaling(thresh, 0.2)
+            cv2.imshow('Thresh', temp0)
             pass
 
         # Apply dilate to merge text into meaningful lines/paragraphs.
         # Use larger kernel on X axis to merge characters into single line, cancelling out any spaces.
         # But use smaller kernel on Y axis to separate between different blocks of text
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 6)) # TODO: what does this influence?
-        dilate = cv2.dilate(thresh, kernel, iterations=3)          # TODO: what does this interations influence? higher Number worse results?
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 6)) 
+        dilate = cv2.dilate(thresh, kernel, iterations=3)
         
         dilate = thresh
         if debug:
@@ -295,8 +307,8 @@ class GraphicsService():
         contours = self.cvExtractContours(dilate)
         if debug:
             temp1 = cv2.drawContours(newImage.copy(), contours, -1, (255, 0, 0), 2)
-            pass
-            #cv2.imshow('All Contours', temp1)
+            temp1 = self.cvApplyRescaling(temp1, 0.2)
+            cv2.imshow('All Contours', temp1)
 
         # Find largest contour and surround in min area box
         largestContour = contours[0]
@@ -305,8 +317,8 @@ class GraphicsService():
         if debug:
             minAreaRectContour = np.int0(cv2.boxPoints(minAreaRect))
             temp2 = cv2.drawContours(newImage.copy(), [minAreaRectContour], -1, (255, 0, 0), 2)
-            pass
-            #cv2.imshow('Largest Contour', temp2)
+            temp2 = self.cvApplyRescaling(temp2, 0.2)
+            cv2.imshow('Largest Contour', temp2)
             
         # Determine the angle. Convert it to the value that was originally used to obtain skewed image
         

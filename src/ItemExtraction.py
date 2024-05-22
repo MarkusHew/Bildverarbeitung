@@ -27,7 +27,11 @@ class ItemExtraction():
        
         table_img = rows_img[TABLE_NUMBER]
         tablecols_img = self.get_table_col_images(table_img)
-        cv2.imshow("TABLE", table_img)
+# =============================================================================
+#         cv2.imshow("TABLE", table_img)
+#         cv2.waitKey(0)
+# =============================================================================
+        cv2.destroyAllWindows()
         return (table_img, tablecols_img)
 
 
@@ -37,32 +41,28 @@ class ItemExtraction():
         morph_rect_width  = img_width//2
         morph_rect_height = img_width//40 # width const, but height variable due to amounts of items
         kernel_noise = 3
-        # morph_rect_width = 1
-        # morph_rect_height = 1
-        # print(cvImage.shape[:2])
+
         
         thresh = self.apply_thresh(cvImage)
-        # thresh = grs.paintOverBorder(thresh, 2, 2, (255,255,255), 1)
-        # contours = grs.cvExtractContours(thresh)
-        # thresh = grs.fill_contour2border(cvImage, contours[0], False)
-        # test = grs.cvApplyRescaling(thresh, 0.2)
-        # cv2.imshow("hallo___", test)
-        # cv2.imwrite("filename.jpg", thresh)
-        # cv2.waitKey(0)
+
         thresh = self.reduce_noise(thresh, kernel_noise)
+        test_noiseremove = thresh
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (morph_rect_width, morph_rect_height))
         thresh = cv2.dilate(thresh, kernel, iterations=1) 
         
-        # test = GraphicsService.cvApplyRescaling(thresh, 0.2)
-        # test = cv2.cvtColor(test, cv2.COLOR_GRAY2BGR)
+# =============================================================================
+#         test_img = grs.cvApplyRescaling(cvImage, 0.3)
+#         test_thresh = grs.cvApplyRescaling(thresh, 0.3)
+#         test_noiseremove = grs.cvApplyRescaling(test_noiseremove, 0.3)
+#         
+#         cv2.imshow("test_img", test_img)
+#         cv2.imshow("test_thresh", test_thresh)
+#         cv2.imshow("test_noiseremove", test_noiseremove)
+# =============================================================================
         
-
         cnts, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) # returns tuple with Array of int32
         cnts = imutils.grab_contours((cnts, hierarchy))
         filtered_cnts = self.filter_contours(cnts, img_width, centering=True, filtering=False)
-        test = GraphicsService().cvApplyRescaling(thresh, 0.2)
-        cv2.imshow("thresh", test)
-        cv2.waitKey(0)
         row_images = self.crop_images(cvImage, filtered_cnts)
         
         return row_images
@@ -74,11 +74,9 @@ class ItemExtraction():
         table_thresh = self.reduce_noise(table_thresh, 5)
         
         
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (table_width//45, table_height//2))
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (table_width//31, table_height//2))
         table_thresh = cv2.dilate(table_thresh, kernel, iterations=1)
-        cv2.imshow("table_dilate", table_thresh)
-        # test = GraphicsService.cvApplyRescaling(table_thresh, 0.4)
-        # cv2.imshow("col thresh", test)
+        # cv2.imshow("table_dilate", table_thresh)
         cnts, hierarchy = cv2.findContours(table_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) # returns tuple with Array of int32
         cnts = imutils.grab_contours((cnts, hierarchy))
         
@@ -155,10 +153,6 @@ class ItemExtraction():
 
             # Calculate the distance of the contour's center from the middle
             distance_from_middle = abs(contour_center_x - middle_x)
-            # Check if the contour is within the threshold distance from the middle
-            # if distance_from_middle <= max_distance_from_middle:
-            #     if (h >= median_h) and (w >= median_w):
-            #         filtered_contours.append(contour) 
             
             if check_middle(distance_from_middle) and check_height(h) and check_width(w):
                 filtered_contours.append(contour) 
