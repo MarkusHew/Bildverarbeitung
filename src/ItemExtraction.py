@@ -41,7 +41,6 @@ class ItemExtraction():
         morph_rect_width  = img_width//2
         morph_rect_height = img_width//40 # width const, but height variable due to amounts of items
         kernel_noise = 3
-
         
         thresh = self.apply_thresh(cvImage)
 
@@ -71,12 +70,13 @@ class ItemExtraction():
         table_height, table_width = table_img.shape[:2]
         
         table_thresh = self.apply_thresh(table_img)
-        table_thresh = self.reduce_noise(table_thresh, 5)
+        table_thresh = self.reduce_noise(table_thresh, 3)
         
         
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (table_width//31, table_height//2))
         table_thresh = cv2.dilate(table_thresh, kernel, iterations=1)
         # cv2.imshow("table_dilate", table_thresh)
+        # cv2.waitKey(0)
         cnts, hierarchy = cv2.findContours(table_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) # returns tuple with Array of int32
         cnts = imutils.grab_contours((cnts, hierarchy))
         

@@ -29,21 +29,35 @@ pd.set_option('display.max_columns', None)  # Keine Begrenzung für die Anzahl v
 
 def Texterkennung_Spalten(bin_img):
     img_boxes, text_line, tab = textbox(bin_img, 3)
-    first_text = text_line[0]
-    spalte = [first_text[0]]
-    for i in range(1, len(text_line)):
-        # parameters
-        current_ele = text_line[i]
-        previous_ele = text_line[i-1]
-        
-        # elemment in previous row -> add to previous list item
-        if previous_ele[1] == current_ele[1]:
-            spalte[-1] += " " + current_ele[0]
+    if len(text_line) !=0:
+        first_text = text_line[0]
+        spalte = [first_text[0]]
+        for i in range(1, len(text_line)):
+            # parameters
+            current_ele = text_line[i]
+            previous_ele = text_line[i-1]
             
-        # element in new row -> add new list item
-        if  previous_ele[1] != current_ele[1]:
-            spalte.append(current_ele[0])
-    return spalte
+            # elemment in previous row -> add to previous list item
+            if previous_ele[1] == current_ele[1]:
+                spalte[-1] += " " + current_ele[0]
+                
+            # element in new row -> add new list item
+            if  previous_ele[1] != current_ele[1]:
+                spalte.append(current_ele[0])
+        return spalte
+    
+def check_Spalten(cols):
+    lengths = []
+    new_cols = ()
+    for c in cols:
+        print(c)
+        lengths.append(len(c))
+    max_lenght = max(lengths)
+    for c in cols: 
+        for i in range(0, max_lenght - len(c)):
+            c.append("None")
+        new_cols += (c, )   
+    return new_cols
 
 def Bild_skalieren_und_Farbe(img, width):
     DEBUG = False

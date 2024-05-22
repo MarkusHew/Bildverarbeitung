@@ -95,6 +95,7 @@ def main():
 # =============================================================================
         print("TABELLE")
         # find item table, extract columms and detect text
+        img = grs.cvRemoveBorders(img)
         table_col_text = ()
         img_table, img_cols = itex.get_tableofitems(img, 3)
         
@@ -102,22 +103,24 @@ def main():
         for i in range(0, len(img_cols)):
             current_img = img_cols[i]
             thresh = grs.cvToBlackWhite(current_img, 3)
-            thicker_font = grs.cvApplyThickerFont(thresh, 3)
+            thicker_font = grs.cvApplyThickerFont(thresh, 1)
             
             # read text from image and create list
             spalte = tx.Texterkennung_Spalten(thicker_font)
             table_col_text += (spalte, )
             
-            print(spalte)
             if DEBUG: 
                 cv2.imshow("thresh_col"+str(i), thresh)
-                cv2.imshow("thicker_Font_col"+str(i), thicker_font)
+                cv2.imshow("thicker_Font_col"+str(i), 5)
                 print(spalte)
-            
+        table_col_text = tx.check_Spalten(table_col_text)
+        for col in table_col_text: 
+            print(col)
         print(f"\n\n")
 # =============================================================================
         binary = grs.cvToBlackWhite(img, 3)
-        binary = grs.cvApplyThickerFont(binary, 3)
+        binary = grs.cvApplyThickerFont(binary, 5)
+        
         img_boxes,text,tab=tx.textbox(img, 4)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
 
         # Call funct. to extract shop_name from logo:
