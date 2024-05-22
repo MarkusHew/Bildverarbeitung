@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # own functions
-from src.webcam import Bild_aufnehmen, Zusammenfugen
+import src.webcam as webcam
 import src.Texterkennung as tx
 import src.DatatoCSV as cs
 import src.replaceUnwanted as rpu
@@ -50,10 +50,15 @@ fih=FileHandling("in","out") # select relative in- and output paths
 
 mode = 1
 csv_seperator = ',' # is either semicolon ';' or comma ','
+                    # if this here doesn't work  
+                    # ==> for new csv: change SEPERATOR in DatatoCSV.py 
+                    # ==> for already generated csv: use replaceUnwanted.py
+                    #              change filename to desired filename run code
+
 # webcam parameters for MODE 0
 webcam_num = 1
 # searchterm for MODE 1 
-searchterm = "IMG_0607.jpg"#"20220928_Coop_Domat-Ems"#"120524_Coop_Haag_Chur" # when empty, opens all files 
+searchterm = "IMG_0641.jpg"#"IMG_0607.jpg"#"20220928_Coop_Domat-Ems"#"120524_Coop_Haag_Chur" # when empty, opens all files 
 # =============================================================================
 
 
@@ -67,8 +72,8 @@ def main():
     
     # MODE 0 external webcam: take photos and sticks receipt together
     if mode == 0: 
-        images=Bild_aufnehmen(webcam_num)     
-        img = Zusammenfugen(fih.getDirInput(),images)   
+        images = webcam.Bild_aufnehmen(webcam_num)     
+        img = webcam.Zusammenfugen(fih.getDirInput(),images)   
         images = [img]
     
     # MODE 1 folder: open a saved image from there
@@ -80,37 +85,19 @@ def main():
         
 # =============================================================================
     for img in images:
-        user_satisfied = False
-        previous_img = [img.copy()]
-        while(not user_satisfied):
-            print(len(previous_img))
-            current_img = previous_img[-1]
-            show_img = grs.cvApplyRescaling(current_img, 0.2)
-            cv2.imshow("q: abbrechen, w:weiter, c:zuscheiden, d:loeschen", show_img)
-            
-            key = cv2.waitKey(0)
-            if key == ord('c'):
-                new_img = grs.cvRemoveBorders(current_img)
-                previous_img.append(new_img)
-            if key == ord('d'): 
-                if len(previous_img) != 1:
-                    del previous_img[-1]
-            if key == ord('w'):
-                break
-            if key == ord('q'):
-                return -1
-        cv2.destroyAllWindows()
-        del previous_img
+        img, success = grs.imgPreperationUser(img)
+        if not success:
+            return -1
         
         binary = grs.cvToBlackWhite(img, 3)
         binary = grs.cvApplyThickerFont(binary, 3)
-        img_boxes,text,tab=tx.textbox(img,4)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
+        img_boxes,text,tab=tx.textbox(img, 4)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
         # print("erkannter Text: ", text)
         # print(tab.to_string())
         # borders= grs.cvRemoveBorders(rotate)
 # =============================================================================
 #         print(binary.shape)
-#         cv2.imwrite("in/binary.tif", binary)
+#         cv2.imwrite("in/binary.tcif", binary)
 #         grs.displayImage("in/binary.tif")
 #         rescaled = grs.cvApplyRescaling(img, 0.3)
 #         plt.imshow(img, cmap='gray')
@@ -138,25 +125,24 @@ def main():
 # =============================================================================
         # find item table, extract columms and detect text
         table_col_text = ()
-        for img in images:
-            img_table, img_cols = itex.get_tableofitems(img, 3)
-            # grs.deskew(img_table)
-            for i in range(0, len(img_cols)):
-                img = img_cols[i]
-                thresh = grs.cvToBlackWhite(img, 3)
-                thicker_font = grs.cvApplyThickerFont(thresh, 3)
-                
-                # read text from image and create list
-                spalte = tx.Texterkennung_Spalten(thicker_font)
-                table_col_text += (spalte, )
-                if DEBUG: 
-                    cv2.imshow("thresh_col"+str(i), thresh)
-                    cv2.imshow("thicker_Font_col"+str(i), thicker_font)
-                    print(spalte, f"\n")
+        img_table, img_cols = itex.get_tableofitems(img, 3)
+        # grs.deskew(img_table)
+        for i in range(0, len(img_cols)):
+            img = img_cols[i]
+            thresh = grs.cvToBlackWhite(img, 3)
+            thicker_font = grs.cvApplyThickerFont(thresh, 3)
+            
+            # read text from image and create list
+            spalte = tx.Texterkennung_Spalten(thicker_font)
+            table_col_text += (spalte, )
+            if DEBUG: 
+                cv2.imshow("thresh_col"+str(i), thresh)
+                cv2.imshow("thicker_Font_col"+str(i), thicker_font)
+                print(spalte, f"\n")
 
-            print(table_col_text)
+        print(table_col_text)
+           
 # =============================================================================
-        
         # wirte all data to csv file
         csv_path = cs.run_data_to_csv(shop_name, nurText, table_col_text, fih.getDirOutput())
         if csv_seperator != ';':

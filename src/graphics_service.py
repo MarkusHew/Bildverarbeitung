@@ -3,8 +3,11 @@
 @author:    Leo Ertuna
 @versions:  ver 0.0.0 - 05.09.2020 - Leo Ertuna
             ver 1.0.0 - 05.04.2024 - Jannis Mathiuet
+            ver 2.0.0 - 20.05.2024 - Jannis Mathiuet (final version)
 @source:    https://github.com/JPLeoRX/opencv-text-deskew/tree/master/python-service/services
 @desc: 
+    multiple functions for image processing
+    some are currently not used
     
 """
 
@@ -16,6 +19,33 @@ import matplotlib.pyplot as plt
 
 # This service contains all OpenCV and display functions that can be reused
 class GraphicsService():
+    
+    def imgPreperationUser(self, cvImage):
+        user_satisfied = False
+        previous_img = [cvImage.copy()]
+        while(not user_satisfied):
+            print("aktueller Stand: ", len(previous_img))
+            current_img = previous_img[-1]
+            show_img = self.cvApplyRescaling(current_img, 0.2)
+            cv2.imshow("q: abbrechen, w:weiter, c:zuscheiden, r:zurueck", show_img)
+            
+            key = cv2.waitKey(0)
+            if key == ord('c'):
+                new_img = self.cropManual(current_img)
+                previous_img.append(new_img)
+            if key == ord('r'): 
+                if len(previous_img) != 1:
+                    del previous_img[-1]
+            if key == ord('w') or key == 13:
+                user_satisfied = True
+            if key == ord('q') or key == 27:
+                cv2.destroyAllWindows()
+                return cvImage, False
+        cv2.destroyAllWindows()
+        img = previous_img[-1]
+        del previous_img
+        return img, True
+    
     def displayImage(self, path:str):
         if type(path) is not str:
             try: 
@@ -42,7 +72,55 @@ class GraphicsService():
             plt.show()
             
         return None
-           
+    
+    def cropManual(self, cvImage):
+        image = cvImage.copy()  
+        # Skalieren des Bildes für die Auswahl
+        scale = 0.2 # Skalierungsfaktor, kann nach Bedarf angepasst werden
+        small_image = cv2.resize(image, None, fx=scale, fy=scale)
+        
+        # Select a region of interest (ROI)
+        img_name = "Select ROI and press Enter to confirm"
+        roi = cv2.selectROI(img_name, small_image)
+        cv2.destroyAllWindows()
+        # cv2.destroyWindow(img_name)
+        x, y, w, h = roi
+        
+        #Auf Originalbild umrechnen
+        x = int(x / scale)
+        y = int(y / scale)
+        w = int(w / scale)
+        h = int(h / scale)
+        
+        # Bild ausschneiden
+        cropped_img = cvImage[y:y+h, x:x+w]
+        # rotate = cv2.rotate(cropped_img,cv2.ROTATE_90_COUNTERCLOCKWISE)  #Bild drehen
+        cropped_img = self.cvRemoveBorders(cropped_img)
+        rotate = self.deskew(cropped_img)    #Bild nach Zeile ausrichten
+        # img_show = cv2.resize(rotate, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+        # img_name = "Bildausschnitt, weiter 'w'"
+        # cv2.imshow(img_name,img_show)    
+        # while True: #Anzeige abbrechen
+        #     key = cv2.waitKey(0)
+        #     if key == ord('w'):
+        #         cv2.destroyWindow(img_name)
+        #         break     
+        return rotate
+    
+    def fill_contour2border(self, cvImage, contour, white: bool):
+        # Create a mask with the same dimensions as the image
+        mask = np.zeros_like(cvImage)
+
+        # Fill the largest contour on the mask
+        cv2.drawContours(mask, [contour], -1, (255, 255, 255), thickness=cv2.FILLED)
+
+        # Invert the mask to fill the area outside the contour
+        inverted_mask = cv2.bitwise_not(mask)
+
+        # Fill the area between the largest contour and the image border
+        cvImage[inverted_mask == 255] = white*255
+        newImage = cv2.drawContours(cvImage, [contour], -1, white*(255, 255, 255), thickness=cv2.FILLED)
+        return newImage
     
     def cvToGrayScale(self, cvImage): 
         if (len(cvImage.shape) != 3): 
@@ -51,6 +129,13 @@ class GraphicsService():
         return cv2.cvtColor(cvImage, cv2.COLOR_BGR2GRAY)
 
     def cvApplyGaussianBlur(self, cvImage, size: int):
+        if type(size) is not int:
+            size = 1
+            print("Error! Please use int for size")
+        if size <= 0:
+            size = 1
+        if not(size % 2):
+            size += 1
         return cv2.GaussianBlur(cvImage, (size, size), 1)
 
     def cvToBlackWhite(self, cvImage, blurSize: int=1):
@@ -107,36 +192,55 @@ class GraphicsService():
     def cvRemoveBorders(self, cvImage): 
         # Don't use for PDF!
         # Don't use for automated task
-        contours = self.cvExtractContours(cvImage)
+        binary = self.cvToBlackWhite(cvImage, 11)
+        contours = self.cvExtractContours(binary)
         largestContour = contours[0]
         x, y, w, h = cv2.boundingRect(largestContour)
         
-        print(cv2.boundingRect(largestContour))
+        # print(cv2.boundingRect(largestContour))
         # crop = cvImage
         crop = cvImage[y:y+h, x:x+w]
         return crop
     
-    def cvAddBorders():
-        return None
 
     # Extracts all contours from the image, and resorts them by area (from largest to smallest)
-    def cvExtractContours(self, cvImage):
-        binary = self.cvToBlackWhite(cvImage, 100)
-        cv2.imshow("test", binary)
-        contours, hierarchy = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    def cvExtractContours(self, img_binary):
+        DEBUG = False
+        
+        # img = self.cvToBlackWhite(cvImage, 101)
+        # binary_inv = cv2.bitwise_not(binary)
+        if DEBUG:
+            # resc_binary = self.cvApplyRescaling(binary, 0.2)
+            # resc_binary_inv = self.cvApplyRescaling(binary_inv, 0.2)
+            cv2.imshow("binary", img_binary)
+            # cv2.imshow("inverted", resc_binary_inv)
+        
+        # cv2.imshow("test", binary)
+        contours, hierarchy = cv2.findContours(img_binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key = cv2.contourArea, reverse = True)
         return contours
 
     # Apply new color to the outer border of the image
-    def paintOverBorder(self, cvImage, borderX: int, borderY: int, color: Tuple[int, int, int]):
+    def paintOverBorder(self, cvImage, borderX: int, borderY: int, color: Tuple[int, int, int], linewidth: int):
         newImage = cvImage.copy()
-        height, width, channels = newImage.shape
-        for y in range(0, height):
-            for x in range(0, width):
-                if (y <= borderY) or (height - borderY <= y):
-                    newImage[y, x] = color
-                if (x <= borderX) or (width - borderX <= x):
-                    newImage[y, x] = color
+        height, width = newImage.shape[:2]
+        height -= (1+linewidth)
+        width -= (1+linewidth)
+        
+        isGray = False
+        if len(newImage.shape) == 2:
+            newImage = cv2.cvtColor(newImage, cv2.COLOR_GRAY2BGR)
+            isGray = True
+        cv2.rectangle(newImage, (0,0), (width, height), color, linewidth)
+
+        # for y in range(0, height):
+        #     for x in range(0, width):
+        #         if (y <= borderY) or (height - borderY <= y):
+        #             newImage[y, x] = color
+        #         if (x <= borderX) or (width - borderX <= x):
+        #             newImage[y, x] = color
+        if isGray:
+            newImage = cv2.cvtColor(newImage, cv2.COLOR_BGR2GRAY)
         return newImage
 
     # Rotate the image around its center
@@ -153,6 +257,9 @@ class GraphicsService():
 # =============================================================================
     # Deskew image
     def deskew(self, cvImage) -> Tuple:
+        h_img, w_img = cvImage.shape[:2]
+        if (h_img < w_img):
+            cvImage = cv2.rotate(cvImage, cv2.ROTATE_90_CLOCKWISE)
         skewangle = self.getSkewAngle(cvImage, True)
         # print(angle)
         # return self.rotateImage(cvImage, -1.0 * angle), angle
@@ -162,10 +269,11 @@ class GraphicsService():
     def getSkewAngle(self, cvImage, debug: bool = False) -> float:
         # Prep image, copy, convert to gray scale, blur, and threshold
         newImage = cvImage.copy()
+        
         # gray = GraphicsService().cvToGrayScale(newImage)
         # blur = GraphicsService().cvApplyGaussianBlur(gray, 11)
         # thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-        thresh = self.cvToBlackWhite(newImage, 11)
+        thresh = self.cvToBlackWhite(newImage, 101)
         if debug:
             # cv2.imshow('Gray', gray)
             # cv2.imshow('Blur', blur)
@@ -177,6 +285,8 @@ class GraphicsService():
         # But use smaller kernel on Y axis to separate between different blocks of text
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 6)) # TODO: what does this influence?
         dilate = cv2.dilate(thresh, kernel, iterations=3)          # TODO: what does this interations influence? higher Number worse results?
+        
+        dilate = thresh
         if debug:
             pass
             #cv2.imshow('Dilate', dilate)
@@ -199,6 +309,7 @@ class GraphicsService():
             #cv2.imshow('Largest Contour', temp2)
             
         # Determine the angle. Convert it to the value that was originally used to obtain skewed image
+        
         angle = minAreaRect[-1]
         if angle < -45:
             angle = 90 + angle

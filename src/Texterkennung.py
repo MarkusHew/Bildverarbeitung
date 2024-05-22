@@ -116,8 +116,10 @@ def Bildlogo_erstellen(img):    #Methode kann aus einem Bild das Logo extrahiere
 # Darsetllung 1:Rechteck 2:texterkennung 3:index 4:alles
 def textbox(img, Darstellung, DEBUG: bool=False):   #Methode die mit Textboxen arbeitet und erkannten Text als Liste zurückgibt
     color_image=Bild_skalieren_und_Farbe(img, 1000)
-    data = pytesseract.image_to_data(color_image, lang="deu", config='--psm 6', output_type=pytesseract.Output.DICT)    #Bild in Text
-    tab = pytesseract.image_to_data(color_image, lang="deu", config='--psm 6', output_type='data.frame')
+    data = pytesseract.image_to_data(color_image, lang="deu", 
+                                     config='--psm 6', output_type=pytesseract.Output.DICT)    #Bild in Text
+    tab = pytesseract.image_to_data(color_image, lang="deu", config='--psm 6', 
+                                    output_type='data.frame')
     tab = tab[tab.conf != -1]
     tab.head()
     tab.groupby(['block_num','par_num','line_num'])['text'].apply(list)
@@ -262,44 +264,47 @@ def logo(img, pfad):  # OS-sensitive Methode die Logo in Bild erkennt und Shopna
 # =============================================================================
 # TESTING
 # =============================================================================
-def main():    
-    
-    # Setze die Umgebungsvariable TESSDATA_PREFIX
-    os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
-    #os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata" # Fuer Linux Ubuntu
-    
-    n=1 # 1:Shoplogo abspeichern, 2:Logo erkennen, 3: Text erkennen und ausgeben
-    try: #Bild öffnen aus ubergeordnetem Verzeichnis        
-        current_directory = os.getcwd()
-        print("Aktuelles Verzeichnis:", current_directory)
-        parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
-        Verzeichnis=os.path.join(parent_directory,"in", "Rechnung_Coop.png")
-        img = cv2.imread(Verzeichnis)
-        print(img.shape)  
-
-    except Exception as e:
-        print(f"Fehler beim Öffnen des Bildes: {e}")
-
-    if n==1:
-        Bildlogo_erstellen(img)
-    if n==2:
-        found ,shop_name = logo(img, parent_directory)
-        if found:
-            print("Rechnung von: ",shop_name)
-        else:
-            print("keine Ubereinstimmung")
-    if n==3:
-        img_boxes,text,tab=textbox(img,2)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
-        print("erkannter Text: ",text)
-        print(tab.to_string())
-        #pprint.pprint(tab)        
-        cv2.imshow('Detected Text', img_boxes)
-        cv2.waitKey(0)
-
-    if n==4:
-        image= boundingBox(img,current_directory)
-        cv2.imshow('bounding boxes', image)
-        cv2.waitKey(0)
-
-if __name__ == "__main__" :
-    main()
+# =============================================================================
+# def main():    
+#     
+#     # Setze die Umgebungsvariable TESSDATA_PREFIX
+#     os.environ["TESSDATA_PREFIX"] = r"C:\msys64\mingw64\share\tessdata\configs" #hier sind die Sprachdateien
+#     #os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata" # Fuer Linux Ubuntu
+#     
+#     n=1 # 1:Shoplogo abspeichern, 2:Logo erkennen, 3: Text erkennen und ausgeben
+#     try: #Bild öffnen aus ubergeordnetem Verzeichnis        
+#         current_directory = os.getcwd()
+#         print("Aktuelles Verzeichnis:", current_directory)
+#         parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
+#         Verzeichnis=os.path.join(parent_directory,"in", "Rechnung_Coop.png")
+#         img = cv2.imread(Verzeichnis)
+#         print(img.shape)  
+# 
+#     except Exception as e:
+#         print(f"Fehler beim Öffnen des Bildes: {e}")
+# 
+#     if n==1:
+#         Bildlogo_erstellen(img)
+#     if n==2:
+#         found ,shop_name = logo(img, parent_directory)
+#         if found:
+#             print("Rechnung von: ",shop_name)
+#         else:
+#             print("keine Ubereinstimmung")
+#     if n==3:
+#         img_boxes,text,tab=textbox(img,2)    #1: Rechteck, 2:Text, 3:Index, 4: Alles
+#         print("erkannter Text: ",text)
+#         print(tab.to_string())
+#         #pprint.pprint(tab)        
+#         cv2.imshow('Detected Text', img_boxes)
+#         cv2.waitKey(0)
+# 
+#     if n==4:
+#         image= boundingBox(img,current_directory)
+#         cv2.imshow('bounding boxes', image)
+#         cv2.waitKey(0)
+# 
+# if __name__ == "__main__" :
+#     # main()
+#     print()
+# =============================================================================

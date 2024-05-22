@@ -8,6 +8,8 @@ in order to extract relevant data from the receipt by matching patterns and then
 contaiing the relevant data (eg. shop name, receipt-date, firm identificatin number (UID), Items bought, Prices each, total price, etc.)
 
 """
+SEPERATOR = ',' # set to semi-colo or comma
+
 
 # Import csv-package for creating csv-file:
 import csv
@@ -127,41 +129,6 @@ def extract_UID(ocr_strList):
     else:
         return str(None)
 
-    # try:
-    #     # Find the index of 'BAR' in the list
-    #     indexOfElementBAR = ocr_strList.index('BAR')
-    #     print('The index of the ocr_strList-element \'BAR\' is: ', indexOfElementBAR, '\n')
-        
-        
-    #     # Define the range of indices you want to extract
-    #     subList_StartIndex = max(0, indexOfElementBAR - 2)  # Ensure subList_StartIndex is non-negative
-    #     subList_EndIndex = min(len(ocr_strList), indexOfElementBAR + 12)  # Ensure subList_EndIndex is within global bounds
-        
-    # except ValueError as e:
-    #     print(f"Error while calling extract_UID(text): {e}, UID-pattern is searched over the entire OCR-output-string-list in order to find shop-UID anyway. ;-)")
-    #     subList_StartIndex = 0
-    #     subList_EndIndex = len(ocr_strList)
-    
-    # # Get the sub-list of elements within the defined range
-    # UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
-    
-    # # Get the sub-list of elements within the defined range
-    # #UID_sublist = ocr_strList[subList_StartIndex:subList_EndIndex]
-    # UID_sublist = ocr_strList
-    
-    # # Convert the sub-list to a single string
-    # UID_sublist2String = ' '.join(ocr_strList)
-    
-    # # Check within the sub_list for UID-pattern match
-    # UIDs_found = re.findall(UID_pattern, UID_sublist2String)
-    
-    # if UIDs_found:
-    #     # Prepend 'CHE-' to the UID found and return it all together
-    #     return f'CHE-{UIDs_found[0]}'  # Assuming only one UID is expected in the element
-    
-    # # Return None if no UID is found
-    # return str(None)
-
 
 # Generate combined line sublists (a list of lists containing each product's details (item, amount, price)):
 # Group string-list elements in range [dict_StartIndex:dict_EndIndex] to line-sublists
@@ -223,7 +190,7 @@ def generate_line_sublists(ocr_strList):
 
 
 # Write extracted receipt data to a new CSV-file:           
-def write_receipts_to_csv(folder_path, combined_line_sublists, total_price_chf, ShopName, ShopAddress, uid, ReceiptDate):
+def write_receipts_to_csv(folder_path, table_col_text, total_price_chf, ShopName, ShopAddress, uid, ReceiptDate):
     # create file name
     now = datetime.now()
     date_string = now.strftime("%d%m%Y_%H%M%S")
@@ -235,7 +202,7 @@ def write_receipts_to_csv(folder_path, combined_line_sublists, total_price_chf, 
     with open(file_path, mode='w', encoding='utf-8') as csvfile:
         # Create a CSV writer object
         try:
-            writer = csv.writer(csvfile, delimiter=";")
+            writer = csv.writer(csvfile, delimiter=SEPERATOR)
             print("csv file erstellt in Verzeichnis: ", file_path)
         except Exception as e:
             print(f"Fehler beim erstellen des csv files: {e}")
@@ -256,6 +223,17 @@ def write_receipts_to_csv(folder_path, combined_line_sublists, total_price_chf, 
         writer.writerow(['Items', 'Amount', 'Price [CHF]', 'Total Price [CHF]'])
         
         try:
+            items = table_col_text[0]
+            amounts = table_col_text[1]
+            prices_chf = table_col_text[-1]
+            for i in range(0, len(table_col_text[0])):
+                # Initialize variables
+                item = items[i]
+                amount = amounts[i]
+                price_chf = prices_chf[i]
+                found_amount = False
+                found_price = False
+            
             # Iterate over combined_line_sublists
             for sublist_of_CoLiSu in combined_line_sublists:
                 # Initialize variables
