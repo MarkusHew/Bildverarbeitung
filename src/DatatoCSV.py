@@ -8,7 +8,7 @@ in order to extract relevant data from the receipt by matching patterns and then
 contaiing the relevant data (eg. shop name, receipt-date, firm identificatin number (UID), Items bought, Prices each, total price, etc.)
 
 """
-SEPERATOR = ',' # set to semi-colo or comma
+SEPERATOR = ';' # set to semi-colo or comma
 
 
 # Import csv-package for creating csv-file:
@@ -24,13 +24,14 @@ import os
 # =============================================================================
 
 
-def run_data_to_csv(shop_name: str, full_text_list: list, 
+def run_data_to_csv(shop_name: str, adress: str, full_text_list: list, 
                     table_col_text: tuple, savepath: str):
     # # Call funct. to extract receipt-date out of string-list:
     receipt_date = extract_receipt_date(full_text_list)
 
     # # Call the shop_address funct.:
-    shopAddress = extract_shop_address(full_text_list)
+    # shopAddress = extract_shop_address(full_text_list)
+    shopAddress = adress
     # print(f'This is the shop address: {shopAddress}\n')
 
     # # Call the extract_total_price function:
@@ -78,7 +79,7 @@ def extract_receipt_date(ocr_strList):
 
 #Func to extract shop address:
 def extract_shop_address(ocr_strList):
-    shop_address = "None"
+    shop_address = "Chur Quader"
     try: 
         zeile2=[tupel[0] for tupel in ocr_strList if tupel[1] == 2]
         shop_address = " ".join(zeile2) # Extract the address elements from ocr_strList-indices 5 and 6

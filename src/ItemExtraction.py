@@ -19,7 +19,7 @@ import os
 # =============================================================================
 # functions
 # =============================================================================
-class ItemExtraction():
+class ItemExtraction():    
     def get_tableofitems(self, cvImage, tablenum:int, getcols: bool=False):
         TABLE_NUMBER = tablenum # statring at 0
         
